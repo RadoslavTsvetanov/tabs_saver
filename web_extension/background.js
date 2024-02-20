@@ -17,17 +17,9 @@ function log_all_tabs() {
     });
 }
 
-browser.tabs
-  .query({})
-  .then((tabs) => {
-    logTabs(tabs);
-  })
-  .catch((error) => {
-    console.error("Error: !!!!!!!!!!!!!!!!!!!!!!", error);
-  });
+log_all_tabs();
 
 browser.tabs.onCreated.addListener((tab) => {
-  log_all_tabs;
   console.log("New Tab Created:");
   console.log("Tab ID:", tab.id);
   console.log("Title:", tab.title);
