@@ -4,8 +4,7 @@
   "version": "1.0",
   "permissions": ["tabs","scripting","storage"],
   "background": {
-    "scripts": ["background.js"],
-    "persistent": true
+    "scripts": ["background.js"]
   },
   "action": {
     "default_popup":"index.html"

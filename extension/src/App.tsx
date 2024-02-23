@@ -1,69 +1,112 @@
-import { useState,ChangeEvent, FormEvent  } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
-interface Props {
-  initialValue: string;
-  onSubmit: (value: string) => void;
+import { useState, useEffect } from 'react';
+import { LoginForm, SignUpForm } from './auth';
+import { UserStorage } from './utils/webStorage';
+import { log_all_tabs } from './utils/tabs';
+function change_auth_page(change_function: () => void) {
+  change_function()
 }
+const Main: React.FC = (() => {
+  const [global, setGlobal] = useState<{ name: string | undefined }>({
+    name: undefined
+  });
 
-function Form({ initialValue, onSubmit }: Props): JSX.Element {
-  const [value, setValue] = useState<string>(initialValue);
+  function change_global<V>(key: string, val: V) {
+    setGlobal((prevGlobal) => ({
+      ...prevGlobal,
+      [key]: val
+    }));
+  }
 
-  const handleChange = (event: ChangeEvent<HTMLInputElement>): void => {
-    setValue(event.target.value);
-  };
 
-  const handleSubmit = (event: FormEvent<HTMLFormElement>): void => {
-    event.preventDefault();
-    onSubmit(value);
-  };
+  useEffect(() => {
 
-  return (
-    <form onSubmit={handleSubmit}>
-      <input
-        type="text"
-        value={value}
-        onChange={handleChange}
-      />
-      <button type="submit">Submit</button>
-    </form>
-  );
-}
+    async () => {
+      const name = await UserStorage.get_username()
+      change_global<string>("name",name)
+    }
+  },[])
+
+  return <>
+    <div>{ global?.name ? global.name :"Loading..." }</div>
+    <button onClick={ log_all_tabs}></button>
+  </>
+
+
+})
+
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [username, setUsername] = useState<string | undefined | null>(undefined);
+  const [global, setGlobal] = useState<{ is_login_selected: boolean }>({
+    is_login_selected: true
+  });
+
+  function change_global<V>(key: string, val: V) {
+    setGlobal((prevGlobal) => ({
+      ...prevGlobal,
+      [key]: val
+    }));
+  }
+
+  useEffect(() => {
+    const fetchData = async () => {
+      const name = await UserStorage.get_username()
+      setUsername(name);
+    };
+
+    fetchData();
+
+    change_global<boolean>('is_login_selected', true);
+  }, []);
 
   return (
     <>
-      <div>
-        <a href="https://vitejs.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-      <Form initialValue={""} onSubmit={(value: string) => {
-        chrome.storage.session.set({username : value }).then(() => {
-    console.log("Value was set");
-  });
+      {username ? (
+        <>
+        
+        <Main/>
+        <div>{username}</div>
+        </>
+      ) : (
+        <>
+          {global['is_login_selected'] ? (
+            <>
+              <LoginForm
+                  onSubmit={async (email: string | undefined ,username: string ) => {
+                    console.log(email)
 
-      }}/>
+                    UserStorage.set_username(username).then(() => { setUsername(username)})
+
+                    
+                  }}
+                  changePage={() => {
+                    change_auth_page(() => { change_global("is_login_selected", false) })
+                  }}
+              />
+            </>
+          ) : (
+            <>
+              <SignUpForm
+                    onSubmit={async (email: string | undefined, username: string) => {
+                      console.log(email)
+                      UserStorage.set_username(username).then(() => {
+                        setUsername(username)
+                      })
+  }}
+  changePage={() => {
+    change_auth_page(() => {
+      change_global("is_login_selected", true);
+    });
+  }}
+/>
+
+
+            </>
+          )}
+        </>
+      )}
     </>
-  )
+  );
 }
 
-export default App
+export default App;

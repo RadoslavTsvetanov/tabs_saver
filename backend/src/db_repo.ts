@@ -78,6 +78,5 @@ export class DbRepo {
             throw error;
         }
     }
-    // Method to retrieve a user by email
     
 } 

@@ -49,11 +49,12 @@ class API {
       console.error("Error sending request:", error);
     }
   }
+
+  async start_new
 }
 
 // Example usage:
 const api = new API();
-const tab = { url: "https://example.com", title: "Example" };
 
 function retrieve_username() {
   browser.storage.session.get("username").then((result) => {
@@ -89,6 +90,7 @@ function logTabs(tabs) {
 }
 
 function log_all_tabs() {
+  //TODO find how to import this from somewhere to remove code duplication
   browser.tabs
     .query({})
     .then((tabs) => {
