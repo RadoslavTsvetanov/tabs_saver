@@ -1,18 +1,11 @@
-//TODO fix this -> const browser = browser || chrome
-
+// Define action_type
 const action_type = {
   delete: 0,
   change: 1,
   created: 2,
 };
 
-/**
- * Creates a request object with tab details and action.
- * @param {Object} tab - The tab object containing url and title.
- * @param {string} action - The action to perform on the tab.
- * @param {string} reqType - The type of request (e.g., 'GET', 'POST').
- * @returns {Object} The request object.
- */
+// Function to create a request object
 function make_req(tab, action, reqType) {
   return {
     method: reqType,
@@ -23,17 +16,14 @@ function make_req(tab, action, reqType) {
   };
 }
 
+class User {}
+
+// API class for sending requests
 class API {
   constructor() {
     this.endpoint = "https://example.com/api"; // Your endpoint URL
   }
 
-  /**
-   * Sends a tab change request to the server.
-   * @param {Object} tab - The tab object containing url and title.
-   * @param {string} action - The action to perform on the tab.
-   * @param {string} reqType - The type of request (e.g., 'GET', 'POST').
-   */
   async send_tab_change(tab, action, reqType) {
     try {
       const req = make_req(tab, action, reqType);
@@ -49,19 +39,19 @@ class API {
       console.error("Error sending request:", error);
     }
   }
-
-  async start_new
 }
 
-// Example usage:
+// Instantiate API
 const api = new API();
 
+// Function to retrieve username
 function retrieve_username() {
   browser.storage.session.get("username").then((result) => {
     console.dir("Value is ", result.username);
   });
 }
 
+// Function to create a tab object for API
 function create_tab_object_for_api(tab) {
   return {
     id: tab.id,
@@ -70,6 +60,7 @@ function create_tab_object_for_api(tab) {
   };
 }
 
+// Function to create a change object for API
 function create_change_object_for_api(tab, change_type) {
   const formatted_tab = create_tab_object_for_api(tab);
   return {
@@ -78,55 +69,37 @@ function create_change_object_for_api(tab, change_type) {
   };
 }
 
-function logTabs(tabs) {
-  // tabs.forEach((tab) => {
-  //   console.log("Tab ID:", tab.id);
-  //   console.log("Title:", tab.title);
-  //   console.log("URL:", tab.url);
-  // });
-  return tabs.map((tab) => {
-    return create_tab_object_for_api(tab);
-  });
-}
-
+// Function to log all tabs
 function log_all_tabs() {
-  //TODO find how to import this from somewhere to remove code duplication
   browser.tabs
     .query({})
     .then((tabs) => {
-      const formatted_tabs = logTabs(tabs);
+      const formatted_tabs = tabs.map(create_tab_object_for_api);
       console.log(formatted_tabs);
     })
     .catch((error) => {
-      console.error("Error: !!!!!!!!!!!!!!!!!!!!!!", error);
+      console.error("Error:", error);
     });
 }
 
+// Log all tabs initially
 log_all_tabs();
 
+// Event listener for tab creation
 browser.tabs.onCreated.addListener((tab) => {
   retrieve_username();
   console.log(create_change_object_for_api(tab, "createdTab"));
 });
 
+// Event listener for tab update
 browser.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
   console.log(create_change_object_for_api(tab, "updatedTab"));
 });
 
-browser.tabs.onRemoved.addListener((tab, removed_info) => {
-  console.dir("hfurhfurhfurf", tab, removed_info);
+// Event listener for tab removal
+browser.tabs.onRemoved.addListener((tabId, removeInfo) => {
+  console.dir("Removed tab:", tabId, removeInfo);
 });
 
-let timer = 0;
-let every_5_seconds = 5 * 1000;
-let every_minute = 1000 * 60;
-let schedule_run = every_5_seconds;
-setInterval(() => {
-  timer += schedule_run;
-
-  if (timer >= every_minute) {
-    timer = 0;
-
-    log_all_tabs();
-  }
-}, schedule_run);
+// Periodically log all tabs
+setInterval(log_all_tabs, 5 * 1000); // Log every 5 seconds

@@ -1,15 +1,16 @@
 import express, { Request, Response } from 'express';
 import { DbRepo } from './db_repo';
+import { Change } from './models/Users';
 const app = express();
 const db_repo = new DbRepo();
 
 app.use(express.json());
 
-app.post("/create_user",async (req: Request, res: Response) => {
+app.post("/user",async (req: Request, res: Response) => {
     const {name, email} = req.body
     
     try {
-        const user = await db_repo.createUser(name, email, undefined, undefined)
+        const user = await db_repo.createUser(name, email, undefined)
         if (user == null || user == undefined) {
             return res.status(500).json("error creating user")
         }
@@ -32,17 +33,36 @@ app.get('/user/:username',async (req: Request, res: Response) => {
     }
 });
 
-app.post('/change_tabs',async (req: Request, res: Response) => {
-    const { username, change } = req.body;
-    
-    try {
-        const updated_user = await db_repo.addChangeToUser(username, change)
-    } catch (err) { }
+app.post('tabs/change',async (req: Request, res: Response) => {
+  const { username,change, tab_session_name }:{username: string,change: Change, tab_session_name: string} = req.body;
+        
 
-  res.status(200).json({
+
+  try {
+    
+  } catch (e) {
+    console.log(e)
+  }
+
+  return res.status(200).json({
     
   });
 });
+
+app.post("/tabs/new_session", (req, res) => {
+
+  return res.status(200).json()
+})
+
+app.get("/tabs/session", (req, res) => {
+  try {
+    const session = db_repo.get_session()
+  } catch (error){
+  console.log(error)
+    
+  }
+})
+
 
 const port = 3000;
 

@@ -1,0 +1,58 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// schema.prisma// schema.prisma
+model User {
+  id         Int       @id @default(autoincrement())
+  is_premium Boolean
+  name       String    @unique
+  email      String?
+  sessions   Session[]
+}
+
+model Session {
+  id             Int      @id @default(autoincrement())
+  creation_date  DateTime
+  userId         Int
+  user           User     @relation(fields: [userId], references: [id])
+  baseSnapshotId Int
+  baseSnapshot   Snapshot @relation(fields: [baseSnapshotId], references: [id])
+  changes        Change[]
+}
+
+model Change {
+  id             Int     @id @default(autoincrement())
+  type_of_change String
+  tabId          Int
+  sessionId      Int
+  tab            Tab     @relation(fields: [tabId], references: [id])
+  session        Session @relation(fields: [sessionId], references: [id])
+}
+
+model Tab {
+  id                           Int       @id @default(autoincrement())
+  tab_id_given_from_chrome_api Int
+  url                          String
+  title                        String
+  Change                       Change[]
+  Snapshot                     Snapshot? @relation(fields: [snapshotId], references: [id])
+  snapshotId                   Int?
+}
+
+model Snapshot {
+  id      Int       @id @default(autoincrement())
+  tabs    Tab[]
+  Session Session[]
+}

@@ -27,14 +27,8 @@ export class DbRepo {
     }
 
     // Method to create a new user
-    async createUser(name: string, email: string, baseSnapshot: models.Snapshot | undefined, changes: models.Change[] | undefined): Promise<models.User> {
-        try {
-            const newUser = await UserModel.create({ name, email, base_snapshot: baseSnapshot || null, changes:changes ||  []});
-            return newUser;
-        } catch (error) {
-            console.error('Error creating user:', error);
-            throw error;
-        }
+    async createUser(name: string, email: string, changes: models.Change[] | undefined): Promise<models.User| null> {
+        return null
     }
 
 
@@ -48,35 +42,13 @@ export class DbRepo {
         }
     }
 
-    async getUserTabsHistory(name: string){
-        try {
-            const user = await this.getUserByName(name);
-            if (user == null) {
-                return null
-            } else {
-                return {
-                    base_snapshot: user.base_snapshot,
-                    changes: user.changes
-                }
-            }
-        } catch (error) {
-            console.log(error);
-        }
+    async getUserTabsHistory(name: string,session_name: string){
+        
     }
 
 
-    async addChangeToUser(name: string, change: models.Change): Promise<models.User | null> {
-        try {
-            const user = await UserModel.findOneAndUpdate(
-                { name },
-                { $push: { changes: change } },
-                { new: true }
-            ).exec();
-            return user;
-        } catch (error) {
-            console.error('Error adding change to user:', error);
-            throw error;
-        }
+    async addChangeToUser(username: string, change: models.Change, session_name: string): Promise<models.User | null> {
+        return null
     }
     
 } 

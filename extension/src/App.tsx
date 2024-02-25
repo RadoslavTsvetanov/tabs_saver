@@ -1,56 +1,41 @@
-import { useState, useEffect } from 'react';
-import { LoginForm, SignUpForm } from './auth';
+import React, { useContext, useState, useEffect } from 'react';
+import { LoginForm, SignUpForm } from './components/auth';
 import { UserStorage } from './utils/webStorage';
-import { log_all_tabs } from './utils/tabs';
+import { Tabs } from './components/tabs';
+import { UsernameContext } from './utils/constext';
+
 function change_auth_page(change_function: () => void) {
-  change_function()
+  change_function();
 }
-const Main: React.FC = (() => {
-  const [global, setGlobal] = useState<{ name: string | undefined }>({
-    name: undefined
-  });
 
-  function change_global<V>(key: string, val: V) {
-    setGlobal((prevGlobal) => ({
-      ...prevGlobal,
-      [key]: val
-    }));
-  }
+const Main: React.FC = () => {
+  const { username } = useContext(UsernameContext);
 
-
-  useEffect(() => {
-
-    async () => {
-      const name = await UserStorage.get_username()
-      change_global<string>("name",name)
-    }
-  },[])
-
-  return <>
-    <div>{ global?.name ? global.name :"Loading..." }</div>
-    <button onClick={ log_all_tabs}></button>
-  </>
-
-
-})
-
+  return (
+    <>
+      <div>{username ? username : "Loading..."}</div>
+      <Tabs username={username ? username : undefined} />
+    </>
+  );
+};
 
 function App() {
-  const [username, setUsername] = useState<string | undefined | null>(undefined);
   const [global, setGlobal] = useState<{ is_login_selected: boolean }>({
-    is_login_selected: true
+    is_login_selected: true,
   });
+
+  const [username, setUsername] = useState<string | undefined>(undefined);
 
   function change_global<V>(key: string, val: V) {
     setGlobal((prevGlobal) => ({
       ...prevGlobal,
-      [key]: val
+      [key]: val,
     }));
   }
 
   useEffect(() => {
     const fetchData = async () => {
-      const name = await UserStorage.get_username()
+      const name = await UserStorage.get_username();
       setUsername(name);
     };
 
@@ -59,53 +44,52 @@ function App() {
     change_global<boolean>('is_login_selected', true);
   }, []);
 
+  // Step 3: Provide the username and setUsername function through the context
   return (
-    <>
+    <UsernameContext.Provider value={{ username, setUsername }}>
       {username ? (
         <>
-        
-        <Main/>
-        <div>{username}</div>
+          <Main />
         </>
       ) : (
         <>
           {global['is_login_selected'] ? (
             <>
               <LoginForm
-                  onSubmit={async (email: string | undefined ,username: string ) => {
-                    console.log(email)
+                onSubmit={async (email: string | undefined, username: string) => {
+                  console.log(email);
 
-                    UserStorage.set_username(username).then(() => { setUsername(username)})
-
-                    
-                  }}
-                  changePage={() => {
-                    change_auth_page(() => { change_global("is_login_selected", false) })
-                  }}
+                  UserStorage.set_username(username).then(() => {
+                    setUsername(username);
+                  });
+                }}
+                changePage={() => {
+                  change_auth_page(() => {
+                    change_global("is_login_selected", false);
+                  });
+                }}
               />
             </>
           ) : (
             <>
               <SignUpForm
-                    onSubmit={async (email: string | undefined, username: string) => {
-                      console.log(email)
-                      UserStorage.set_username(username).then(() => {
-                        setUsername(username)
-                      })
-  }}
-  changePage={() => {
-    change_auth_page(() => {
-      change_global("is_login_selected", true);
-    });
-  }}
-/>
-
-
+                onSubmit={async (email: string | undefined, username: string) => {
+                  console.log(email);
+                  UserStorage.set_username(username).then(() => {
+                    setUsername(username);
+                  });
+                }}
+                changePage={() => {
+                  change_auth_page(() => {
+                    change_global("is_login_selected", true);
+                  });
+                }}
+              />
             </>
           )}
         </>
       )}
-    </>
+    </UsernameContext.Provider>
   );
 }
 
