@@ -2,8 +2,7 @@
 export enum changes{
     CLOSED_TAB = "closedTab",
     CREATED_TAB = "createdTab",
-    CHANGED_TAB = "changedTab",
-    TAKEN_NEW_SNAPSHOT = "newSnapshot"
+    CHANGED_TAB = "changedTab"
 }
 
 // types.ts

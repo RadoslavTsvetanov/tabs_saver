@@ -18,7 +18,12 @@ const tabsArray = [
   },
   // Add more objects as needed
 ];
-
+const session2: Session = {
+  id: 2,
+  creation_date: new Date(),
+  baseSnapshot: { tabs: [...tabsArray] }, // making a copy of the arr to not reference the arr
+  changes: []
+}
 const session1: Session = {
     id: 1,
     creation_date: new Date(),
@@ -27,5 +32,6 @@ const session1: Session = {
 }
 
 export const testdata = [
-    session1
+  session1,
+  
 ]

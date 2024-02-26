@@ -1,7 +1,7 @@
 import React, { useContext, useState, useEffect } from 'react';
 import { LoginForm, SignUpForm } from './components/auth';
 import { UserStorage } from './utils/webStorage';
-import { Tabs } from './components/tabs';
+import { TabsWrapperComponent } from './components/tabs';
 import { UsernameContext } from './utils/constext';
 
 function change_auth_page(change_function: () => void) {
@@ -10,11 +10,12 @@ function change_auth_page(change_function: () => void) {
 
 const Main: React.FC = () => {
   const { username } = useContext(UsernameContext);
-
+  
   return (
     <>
       <div>{username ? username : "Loading..."}</div>
-      <Tabs username={username ? username : undefined} />
+      <TabsWrapperComponent username={username ? username : undefined} />
+
     </>
   );
 };

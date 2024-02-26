@@ -4,6 +4,7 @@ import { Tab, Session } from "../../../backend/src/models/Users"
 import { UsernameContext } from "../utils/constext";
 import { TabManager } from "../utils/tabs";
 import { testdata } from "../static_dev_data/session";
+import {Loading} from "./loading"
 // import {Api} from "../utils/api"
 
 const Tab: React.FC<{ tab: Tab }> = ({ tab }) => {
@@ -39,7 +40,7 @@ const Session: React.FC<{ session: Session }> = ({ session }) => {
 }
 
 
-export const Tabs: React.FC<{username: string | undefined}> = ({username}) => {
+export const TabsWrapperComponent: React.FC<{username: string | undefined}> = ({username}) => { //! the component is created to logically divide the Main from Tabs 
       const [global, setGlobal] = useState<{ sessions: Session[] | null }>({
           sessions: null
       });
@@ -54,14 +55,29 @@ export const Tabs: React.FC<{username: string | undefined}> = ({username}) => {
         console.log("username: ", username)
         if (username !== undefined) {
             console.log("sending api req", username)
-            change_global<Session[]>("sessions",testdata)
+            change_global<Session[]>("sessions", testdata)
             console.dir("sessions", global.sessions)
         }
-    },[username])
+    }, [username, global.sessions])
     return <>
-        hihihihihihi
+        
         {global.sessions !== null ? global.sessions.map((session) => {
             return <Session session={session}/>
          }) : "Loading ..."}
+    </>
+}
+
+
+export const CurrentSession: React.FC =() => {
+    const [session_data,set_session_data] = useState<Session | undefined>()
+
+    useEffect(() => {
+        async () => {
+            const data = await api.get_session(name)//TODO
+            set_session_data(data)
+        }
+    },[])
+    return <>
+        {session_data !== undefined ? <Session session={session_data} /> : <Loading text={""} />}
     </>
 }
