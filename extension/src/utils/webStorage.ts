@@ -11,16 +11,49 @@
 
 }
 
+type StorageFunctions<V ,T extends Record<string, V | undefined>> = {
+  [K in keyof T]: {
+    get: () => Promise<T[K]>;
+    set: (value: T[K]) => Promise<void>;
+  };
+};
 
+function StorageBuilder<V,T extends Record<string, V>>(
+  schema: T
+): StorageFunctions<V,T> {
+  const storageFunctions = {} as StorageFunctions<V,T>;
 
-export class UserStorage{
-    static async  get_username() {
-        const res = await ChromeStorage.get_value("username")
-        return res;
+  for (const key in schema) {
+    if (Object.prototype.hasOwnProperty.call(schema, key)) {
+      storageFunctions[key] = {
+        get: async () => await ChromeStorage.get_value(key),
+        set: async (value: T[keyof T]) =>
+          await ChromeStorage.set_value<T[keyof T]>(key, value),
+      };
     }
+  }
 
-    static async set_username(username: string) {
-        const res = await ChromeStorage.set_value("username", username)
-        console.log(res)
-    }
+  return storageFunctions;
 }
+
+// Helper function to infer the type of schema
+
+
+/**
+ * 
+ * @param {schema} schema - this is how your storage would look like (the vars) in it {username:""}
+ * @returns
+ */
+function createStorage<S extends Record<string, string>>(schema: S) {
+  return StorageBuilder(schema);
+}
+
+export const storageFunctions = createStorage({
+  username: "",
+  current_session: "",
+});
+
+
+
+
+storageFunctions.current_session.get()

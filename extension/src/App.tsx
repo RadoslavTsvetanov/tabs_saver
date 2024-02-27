@@ -1,21 +1,22 @@
 import React, { useContext, useState, useEffect } from 'react';
 import { LoginForm, SignUpForm } from './components/auth';
-import { UserStorage } from './utils/webStorage';
-import { TabsWrapperComponent } from './components/tabs';
-import { UsernameContext } from './utils/constext';
-
+import { storageFunctions } from './utils/webStorage';
+import { CurrentSession, TabsWrapperComponent } from './components/tabs';
+import { UsernameContext } from './utils/constext'; 
 function change_auth_page(change_function: () => void) {
   change_function();
 }
+const currentSession = "hihihaha"
+const setCurrentSession = () => {}
 
 const Main: React.FC = () => {
   const { username } = useContext(UsernameContext);
   
   return (
     <>
-      <div>{username ? username : "Loading..."}</div>
+      <div className="text-xl text-center mt-4">{username ? username : "Loading..."}</div>
       <TabsWrapperComponent username={username ? username : undefined} />
-
+      <CurrentSession/>
     </>
   );
 };
@@ -36,7 +37,7 @@ function App() {
 
   useEffect(() => {
     const fetchData = async () => {
-      const name = await UserStorage.get_username();
+      const name = await storageFunctions.username.get()
       setUsername(name);
     };
 
@@ -47,7 +48,7 @@ function App() {
 
   // Step 3: Provide the username and setUsername function through the context
   return (
-    <UsernameContext.Provider value={{ username, setUsername }}>
+    <UsernameContext.Provider value={{ username, setUsername,currentSession,setCurrentSession }}>
       {username ? (
         <>
           <Main />
@@ -60,7 +61,7 @@ function App() {
                 onSubmit={async (email: string | undefined, username: string) => {
                   console.log(email);
 
-                  UserStorage.set_username(username).then(() => {
+                  storageFunctions.username.set(username).then(() => {
                     setUsername(username);
                   });
                 }}
@@ -76,7 +77,7 @@ function App() {
               <SignUpForm
                 onSubmit={async (email: string | undefined, username: string) => {
                   console.log(email);
-                  UserStorage.set_username(username).then(() => {
+                  storageFunctions.username.set(username).then(() => {
                     setUsername(username);
                   });
                 }}

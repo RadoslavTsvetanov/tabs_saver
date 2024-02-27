@@ -33,5 +33,5 @@ const session1: Session = {
 
 export const testdata = [
   session1,
-  
+  session2
 ]
