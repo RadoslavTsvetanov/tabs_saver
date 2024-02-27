@@ -2,3 +2,4 @@ should i use a linked list for tracking changes
 since updating a task logs multiple times how to get over that
 ask if i should maintain individual state for each session since they will be updated regularly in their own. E.g. the active session will be updated regularly
 when using a utlity class multiple times should i make it as part of the context or jut import it everywhere
+ask if it is bad to manage the state of username and current session two way like currently or just use the storage to regulate the context value

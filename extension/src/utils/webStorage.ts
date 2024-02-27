@@ -42,15 +42,15 @@ function StorageBuilder<V,T extends Record<string, V>>(
 /**
  * 
  * @param {schema} schema - this is how your storage would look like (the vars) in it {username:""}
- * @returns
+ * @returns since it returns the same type from which it is created you should define your own null values fpr the given type -> example string`s null would be "" or number should be -1
  */
-function createStorage<S extends Record<string, string>>(schema: S) {
+function createStorage<V,S extends Record<string, V>>(schema: S) {
   return StorageBuilder(schema);
 }
 
 export const storageFunctions = createStorage({
   username: "",
-  current_session: "",
+  current_session: -1,
 });
 
 

@@ -1,11 +1,12 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import React, { useEffect, useState, useContext } from "react";
 import { Tab, Session } from "../../../backend/src/models/Users";
-import { UsernameContext } from "../utils/constext";
+import { UserContext } from "../utils/constext";
 import { TabManager } from "../utils/tabs";
 import { testdata } from "../static_dev_data/session";
 import { Loading } from "./loading";
-
+import { Button } from "./simple_button"; 
+import { storageFunctions } from "../utils/webStorage";
 const TabComponent: React.FC<{ tab: Tab }> = ({ tab }) => {
   return (
     <div className="border p-4 m-2">
@@ -24,7 +25,7 @@ const TabComponent: React.FC<{ tab: Tab }> = ({ tab }) => {
 };
 
 const SessionComponent: React.FC<{ session: Session }> = ({ session }) => {
-  const username = useContext(UsernameContext);
+  const user = useContext(UserContext);
 
   return (
     <div className="border p-4 m-2">
@@ -35,14 +36,14 @@ const SessionComponent: React.FC<{ session: Session }> = ({ session }) => {
           <TabComponent key={index} tab={tab} />
         ))}
       </div>
-      <button
-        className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
-        onClick={() => {
-          console.log(`fetching req with id: ${session.id} and name: ${username}`);
-        }}
-      >
-        Restore browser to this state
-      </button>
+      <Button on_click={() => {
+        console.log(`fetching req with id: ${session.id} and name: ${user.username}`);
+      }} text="Retore browser to this state" />
+      <Button on_click={async () => {
+        user.setCurrentSession(session.id)
+        await storageFunctions.current_session.set(session.id)
+        console.log("session: ", user.currentSession)
+      } } text="Set as current session"/>
     </div>
   );
 };
@@ -77,19 +78,21 @@ export const TabsWrapperComponent: React.FC<{ username: string | undefined }> = 
       ) : (
         <div>Loading ...</div>
       )}
+
+      <NewSession/>
     </div>
   );
 };
 
 export const CurrentSession: React.FC = () => {
   const [session_data, set_session_data] = useState<Session | undefined>();
-
+  const context = useContext(UserContext)
   useEffect(() => {
     async () => {
-      const data = testdata[0]; /*await api.get_session(name) */ //TODO
+      const data = testdata[context !== undefined && context.currentSession ? context.currentSession : 0]; /*await api.get_session(name) */ //TODO
       set_session_data(data);
     };
-  }, []);
+  }, [context]);
 
   return (
     <>
@@ -102,7 +105,13 @@ export const CurrentSession: React.FC = () => {
   );
 };
 
-export const NewTab: React.FC = () => {
-    return <div></div>
+export const NewSession: React.FC = () => {
+    return <div>
+      <Button text={"start new browser session"} on_click={() => {
+        TabManager.logAllTabs()
+
+        //TODO call api to create session and assign this id to the current session 
+        }}/>
+    </div>
 }
 
