@@ -101,3 +101,8 @@ export const CurrentSession: React.FC = () => {
     </>
   );
 };
+
+export const NewTab: React.FC = () => {
+    return <div></div>
+}
+
