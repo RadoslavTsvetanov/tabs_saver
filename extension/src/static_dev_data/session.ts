@@ -1,4 +1,4 @@
-import { Session } from "../../../backend/src/models/Users";
+import { Session,changes } from "../../../backend/src/models/Users";
 
 const tabsArray = [
   {
@@ -18,17 +18,31 @@ const tabsArray = [
   },
   // Add more objects as needed
 ];
-const session2: Session = {
-  id: 2,
-  creation_date: new Date(),
-  baseSnapshot: { tabs: [...tabsArray] }, // making a copy of the arr to not reference the arr
-  changes: []
-}
+
 const session1: Session = {
     id: 1,
     creation_date: new Date(),
     baseSnapshot: { tabs: tabsArray },
     changes: []
+}
+setTimeout(() => {}, 1000 * 60) // ! FOR THE TIMESTAMS CREATED TO BE DIFFERENT  
+const session2: Session = {
+  id: 2,
+  creation_date: new Date(),
+    baseSnapshot: { tabs:[ ...tabsArray,{
+    id: 5,
+    title: "unofficial-chatgpt-api/server.py at main · taranjeet/unofficial-chatgpt-api",
+    url: "https://github.com/taranjeet/unofficial-chatgpt-api/blob/main/server.py"
+  } ] },
+  changes: [{
+    id: 1,
+    type_of_change: changes.CREATED_TAB,
+    tab: {
+      id: 5,
+      title: "hihi",
+      url: "http://google.com"
+    }
+    }]
 }
 
 export const testdata = [

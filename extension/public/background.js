@@ -1,4 +1,77 @@
-// Define action_type
+/**
+ * Class representing ChromeStorage for interacting with Chrome's local storage API.
+ */
+class ChromeStorage {
+  /**
+   * Get a value from Chrome's local storage.
+   * @param {string} key - The key of the value to retrieve.
+   * @returns {Promise<any>} - A promise that resolves with the retrieved value.
+   */
+  static async get_value(key) {
+    const result = await chrome.storage.local.get(key);
+    return result[key];
+  }
+
+  /**
+   * Set a value in Chrome's local storage.
+   * @param {string} key - The key under which to store the value.
+   * @param {any} value - The value to store.
+   * @returns {Promise<void>} - A promise that resolves when the value is set.
+   */
+  static async set_value(key, value) {
+    await chrome.storage.local.set({ [key]: value });
+  }
+}
+
+/**
+ * Function to build storage functions based on a schema.
+ * @param {Record<string, any>} schema - The schema defining the structure of storage.
+ * @returns {Record<string, { get: () => Promise<any>, set: (value: any) => Promise<void> }>} - The storage functions.
+ */
+function StorageBuilder(schema) {
+  const storageFunctions = {};
+
+  for (const key in schema) {
+    if (Object.prototype.hasOwnProperty.call(schema, key)) {
+      storageFunctions[key] = {
+        /**
+         * Get a value from storage.
+         * @returns {Promise<any>} - A promise that resolves with the retrieved value.
+         */
+        get: async () => await ChromeStorage.get_value(key),
+        /**
+         * Set a value in storage.
+         * @param {any} value - The value to set.
+         * @returns {Promise<void>} - A promise that resolves when the value is set.
+         */
+        set: async (value) => await ChromeStorage.set_value(key, value),
+      };
+    }
+  }
+
+  return storageFunctions;
+}
+
+/**
+ * Function to create storage functions based on a schema.
+ * @param {Record<string, any>} schema - The schema defining the structure of storage.
+ * @returns {Record<string, { get: () => Promise<any>, set: (value: any) => Promise<void> }>} - The storage functions.
+ */
+function createStorage(schema) {
+  return StorageBuilder(schema);
+}
+
+/**
+ * The storage functions generated based on the provided schema.
+ */
+const storageFunctions = createStorage({
+  username: "", // Initial value for username
+  current_session: -1, // Initial value for current session
+});
+
+//-------------------------------------------------
+//TODO how to import in file background
+
 const action_type = {
   delete: 0,
   change: 1,
@@ -73,9 +146,10 @@ function create_change_object_for_api(tab, change_type) {
 function log_all_tabs() {
   browser.tabs
     .query({})
-    .then((tabs) => {
+    .then(async (tabs) => {
       const formatted_tabs = tabs.map(create_tab_object_for_api);
       console.log(formatted_tabs);
+      console.log("storrage.....", await storageFunctions.username.get());
     })
     .catch((error) => {
       console.error("Error:", error);

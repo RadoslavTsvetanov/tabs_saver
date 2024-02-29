@@ -2,7 +2,8 @@
 export enum changes{
     CLOSED_TAB = "closedTab",
     CREATED_TAB = "createdTab",
-    CHANGED_TAB = "changedTab"
+    CHANGED_TAB = "changedTab",
+    TAKEN_NEW_SNAPSHOT = "newSnapshot"
 }
 
 // types.ts
@@ -25,10 +26,7 @@ export interface Session {
 export interface Change {
   id: number;
   type_of_change: changes;
-  tabId: number;
-  sessionId: number;
   tab: Tab;
-  session: Session;
 }
 
 export interface Tab {

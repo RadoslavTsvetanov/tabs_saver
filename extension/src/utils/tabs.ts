@@ -1,4 +1,4 @@
-import { Tab, Change } from "../../../backend/src/models/Users";
+import { Tab, Change, Snapshot } from "../../../backend/src/models/Users";
 
 export class TabManager {
   static createTabObjectForApi(tab: Tab) {
@@ -33,6 +33,13 @@ export class TabManager {
 
   static revertChanges(change: Change) {
     console.log(change);
+  }
+
+
+  static restore_to_snapshot(snapshot: Snapshot){
+    for (let i = 0; i < snapshot.tabs.length; i++){
+      this.openTab(snapshot.tabs[i].url)
+    }
   }
 
 

@@ -35,8 +35,7 @@ export const SignUpForm: React.FC<Props> = ({ onSubmit, changePage }) => {
 export const LoginForm: React.FC<Props> = ({ onSubmit,changePage }) => {
   const [username, setUsername] = useState('');
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = (_e: React.FormEvent) => {
     onSubmit( undefined, username );
   };
 
