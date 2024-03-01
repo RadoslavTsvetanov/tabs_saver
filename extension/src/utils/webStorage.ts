@@ -1,3 +1,4 @@
+import { changes } from "../../../backend/src/models/Users";
 
  class ChromeStorage {
   static async get_value(key: string) {
@@ -52,7 +53,17 @@ export const storageFunctions = createStorage({
   username: "",
   current_session: -1,
   is_state_being_restored: false,
-  last_change: {}
+  last_change: {
+    id: -1,
+    type_of_change: changes.TAKEN_NEW_SNAPSHOT,
+    tab:{
+      url: "",
+      title:"",
+      id:-1
+    }
+
+  },
+  is_a_session_being_restored: false // made since when restoring a session it opens tabs and so it will track these as changes too
 });
 
 

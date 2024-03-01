@@ -6,7 +6,6 @@ export function restore_to_current_change(session: Session, change_id: number) {
 
 
     console.log("browser state before")
-
     const changesSlice = session.changes.slice(0, change_id);
 
     changesSlice.forEach((change) => {
