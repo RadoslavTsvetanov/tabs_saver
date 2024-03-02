@@ -8,6 +8,7 @@ import { Loading } from "./loading";
 import { Button } from "./simple_button"; 
 import { storageFunctions } from "../utils/webStorage";
 import { Chnage } from "./change";
+import { SessionRestorer } from "../utils/sessionRestorer";
 export const TabComponent: React.FC<{ tab: Tab }> = ({ tab }) => {
   return (
     <div className="border border-gray-400 rounded p-4 m-2 shadow-md hover:shadow-lg">
@@ -42,8 +43,8 @@ const SessionComponent: React.FC<{ session: Session }> = ({ session }) => {
 
         {/**just to divide the custom components */}
         <Button 
-          on_click={() => {
-            // console.log(`Fetching req with id: ${session.id} and name: ${user.username}`);
+          on_click={async () => {
+            await SessionRestorer.restore_session_to_change(session,session.changes[session.changes.length - 1].id)
           }} 
           text="Restore browser to latest state of the session" 
         />

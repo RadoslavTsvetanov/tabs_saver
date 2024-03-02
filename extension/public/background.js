@@ -1,105 +1,28 @@
-/**
- * Class representing ChromeStorage for interacting with Chrome's local storage API.
- */
 class ChromeStorage {
-  /**
-   * Get a value from Chrome's local storage.
-   * @param {string} key - The key of the value to retrieve.
-   * @returns {Promise<any>} - A promise that resolves with the retrieved value.
-   */
-  static async get_value(key) {
-    const result = await chrome.storage.local.get(key);
+  static async getValue(key) {
+    const result = await browser.storage.local.get(key);
     return result[key];
   }
 
-  /**
-   * Set a value in Chrome's local storage.
-   * @param {string} key - The key under which to store the value.
-   * @param {any} value - The value to store.
-   * @returns {Promise<void>} - A promise that resolves when the value is set.
-   */
-  static async set_value(key, value) {
-    await chrome.storage.local.set({ [key]: value });
+  static async setValue(key, value) {
+    await browser.storage.local.set({ [key]: value });
   }
 }
 
-/**
- * Function to build storage functions based on a schema.
- * @param {Record<string, any>} schema - The schema defining the structure of storage.
- * @returns {Record<string, { get: () => Promise<any>, set: (value: any) => Promise<void> }>} - The storage functions.
- */
-function StorageBuilder(schema) {
-  const storageFunctions = {};
-
-  for (const key in schema) {
-    if (Object.prototype.hasOwnProperty.call(schema, key)) {
-      storageFunctions[key] = {
-        /**
-         * Get a value from storage.
-         * @returns {Promise<any>} - A promise that resolves with the retrieved value.
-         */
-        get: async () => await ChromeStorage.get_value(key),
-        /**
-         * Set a value in storage.
-         * @param {any} value - The value to set.
-         * @returns {Promise<void>} - A promise that resolves when the value is set.
-         */
-        set: async (value) => await ChromeStorage.set_value(key, value),
-      };
-    }
-  }
-
-  return storageFunctions;
-}
-
-/**
- * Function to create storage functions based on a schema.
- * @param {Record<string, any>} schema - The schema defining the structure of storage.
- * @returns {Record<string, { get: () => Promise<any>, set: (value: any) => Promise<void> }>} - The storage functions.
- */
-function createStorage(schema) {
-  return StorageBuilder(schema);
-}
-
-/**
- * The storage functions generated based on the provided schema.
- */
-const storageFunctions = createStorage({
-  username: "", // Initial value for username
-  current_session: -1, // Initial value for current session
-});
-
-//-------------------------------------------------
-//TODO how to import in file background
-
-const action_type = {
-  delete: 0,
-  change: 1,
-  created: 2,
+const ActionType = {
+  DELETE: 0,
+  CHANGE: 1,
+  CREATED: 2,
 };
 
-// Function to create a request object
-function make_req(tab, action, reqType) {
-  return {
-    method: reqType,
-    body: JSON.stringify({ tab, action }),
-    headers: {
-      "Content-Type": "application/json",
-    },
-  };
-}
-
-class User {}
-
-// API class for sending requests
 class API {
-  constructor() {
-    this.endpoint = "https://example.com/api"; // Your endpoint URL
+  constructor(endpoint) {
+    this.endpoint = endpoint;
   }
 
-  async send_tab_change(tab, action, reqType) {
+  async sendTabChange(tab, action, reqType) {
     try {
-      const req = make_req(tab, action, reqType);
+      const req = this._makeRequest(tab, action, reqType);
       const response = await fetch(this.endpoint, req);
       if (!response.ok) {
         throw new Error(
@@ -112,68 +35,116 @@ class API {
       console.error("Error sending request:", error);
     }
   }
+
+  _makeRequest(tab, action, reqType) {
+    return {
+      method: reqType,
+      body: JSON.stringify({ tab, action }),
+      headers: {
+        "Content-Type": "application/json",
+      },
+    };
+  }
 }
 
-// Instantiate API
-const api = new API();
+const api = new API("https://example.com/api");
 
-// Function to retrieve username
-function retrieve_username() {
-  browser.storage.session.get("username").then((result) => {
-    console.dir("Value is ", result.username);
-  });
+class TabFormatter {
+  static createTabObject(tab) {
+    return {
+      id: tab.id,
+      title: tab.title,
+      url: tab.url,
+    };
+  }
+
+  static createChangeObject(tab, changeType) {
+    const formattedTab = this.createTabObject(tab);
+    return {
+      tab: formattedTab,
+      typeOfChange: changeType,
+    };
+  }
 }
 
-// Function to create a tab object for API
-function create_tab_object_for_api(tab) {
-  return {
-    id: tab.id,
-    title: tab.title,
-    url: tab.url,
-  };
-}
-
-// Function to create a change object for API
-function create_change_object_for_api(tab, change_type) {
-  const formatted_tab = create_tab_object_for_api(tab);
-  return {
-    tab: formatted_tab,
-    type_of_change: change_type,
-  };
-}
-
-// Function to log all tabs
-function log_all_tabs() {
+function logAllTabs() {
   browser.tabs
     .query({})
     .then(async (tabs) => {
-      const formatted_tabs = tabs.map(create_tab_object_for_api);
-      console.log(formatted_tabs);
-      console.log("storrage.....", await storageFunctions.username.get());
+      const formattedTabs = tabs.map(TabFormatter.createTabObject);
+      console.log(formattedTabs);
+      console.log("Storage:", await ChromeStorage.getValue("username"));
     })
     .catch((error) => {
       console.error("Error:", error);
     });
 }
 
-// Log all tabs initially
-log_all_tabs();
+logAllTabs();
+class TabEventListenerManager {
+  constructor() {
+    this.listeners = [];
+  }
 
-// Event listener for tab creation
-browser.tabs.onCreated.addListener((tab) => {
-  retrieve_username();
-  console.log(create_change_object_for_api(tab, "createdTab"));
+  addEventListener(eventType, callback) {
+    this.listeners.push({ eventType, callback });
+  }
+
+  async handleTabListener(argsObj) {
+    if (await this.shouldListenForTabs()) {
+      console.log("args", argsObj.args);
+      const tab = argsObj.args[0]; // Extract the tab from args array
+
+      const callback = argsObj.callback;
+      await callback(...argsObj.args);
+    }
+  }
+
+  async shouldListenForTabs() {
+    // Assuming ChromeStorage is defined somewhere
+    const username = await ChromeStorage.getValue("username");
+    const isSessionRestoring = await ChromeStorage.getValue(
+      "is_a_session_being_restored"
+    );
+    const currentSession = await ChromeStorage.getValue("current_session");
+
+    return (
+      username !== "" &&
+      username !== undefined &&
+      !isSessionRestoring &&
+      currentSession !== -1 &&
+      currentSession !== undefined
+    );
+  }
+
+  setupListeners() {
+    this.listeners.forEach((listener) => {
+      chrome.tabs[listener.eventType].addListener((...args) => {
+        const argsObj = { args }; // Pass arguments as an array
+        argsObj.callback = listener.callback;
+        this.handleTabListener(argsObj);
+      });
+    });
+  }
+}
+
+const tabEventManager = new TabEventListenerManager();
+
+// Add event listeners
+tabEventManager.addEventListener("onCreated", (tab) => {
+  console.log("Added");
+  console.log("tab", tab);
 });
 
-// Event listener for tab update
-browser.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
-  console.log(create_change_object_for_api(tab, "updatedTab"));
+tabEventManager.addEventListener("onUpdated", (tabId, changeInfo, tab) => {
+  console.log("Updated");
+  console.dir("tab", tab);
+  console.dir("chnageInfo", changeInfo);
+  console.dir("tabId", tabId);
+  // Custom logic for tab update
 });
 
-// Event listener for tab removal
-browser.tabs.onRemoved.addListener((tabId, removeInfo) => {
-  console.dir("Removed tab:", tabId, removeInfo);
-});
+// Add more listener objects as needed
 
-// Periodically log all tabs
-setInterval(log_all_tabs, 5 * 1000); // Log every 5 seconds
+// Set up all listeners
+tabEventManager.setupListeners();

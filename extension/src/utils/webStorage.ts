@@ -52,7 +52,6 @@ function createStorage<V,S extends Record<string, V>>(schema: S) {
 export const storageFunctions = createStorage({
   username: "",
   current_session: -1,
-  is_state_being_restored: false,
   last_change: {
     id: -1,
     type_of_change: changes.TAKEN_NEW_SNAPSHOT,

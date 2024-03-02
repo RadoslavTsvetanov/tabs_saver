@@ -1,5 +1,12 @@
+
+
+import { TabManager } from "./tabs";
+import { storageFunctions } from "./webStorage";
 import { Session, Tab, changes } from "../../../backend/src/models/Users";
-export function restore_to_current_change(session: Session, change_id: number) {
+
+export class SessionRestorer{
+
+private static construct_tab_list_to_change(session: Session, change_id: number) {
     const new_browser_state: Tab[] = [...session.baseSnapshot.tabs];
 
     console.log("change_id", change_id);
@@ -35,4 +42,25 @@ export function restore_to_current_change(session: Session, change_id: number) {
     });
 
     console.dir("New browser state after restoring changes:", new_browser_state);
+    
+    return new_browser_state
+
+}
+
+
+    static async  restore_session_to_change(session: Session, change_id: number) {
+        await storageFunctions.is_a_session_being_restored.set(true)
+
+
+        this.construct_tab_list_to_change(session, change_id).forEach((tab) => {
+        TabManager.openTab(tab.url)
+
+        
+    })
+
+
+
+        await storageFunctions.is_a_session_being_restored.set(false)
+}
+
 }

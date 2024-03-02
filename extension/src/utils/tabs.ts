@@ -15,7 +15,7 @@ export class TabManager {
     });
   }
 
-   static logAllTabs() {
+  static logAllTabs() {
     chrome.tabs
       .query({})
       .then((tabs: chrome.tabs.Tab[]) => {
