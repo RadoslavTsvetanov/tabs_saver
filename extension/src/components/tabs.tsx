@@ -24,42 +24,61 @@ TabManager.openTab(tab.url);
 
 const SessionComponent: React.FC<{ session: Session }> = ({ session }) => {
   const user = useContext(UserContext);
-  
+  const [isCollapsed, setIsCollapsed] = useState(true); // State to track collapsed state
+
+  const toggleCollapse = () => {
+    setIsCollapsed(!isCollapsed);
+  };
+
   return (
     <div className="border border-gray-400 rounded p-4 m-2 shadow-md">
       <div className="text-gray-600 mb-4">Created at: {new Date(session.creation_date).toLocaleString()} </div>
-      <div className="space-y-4">
-        <p className="font-semibold">Base Snapshot:</p>
-        {session.baseSnapshot.tabs.map((tab: Tab, index: number) => (
-          <TabComponent key={index} tab={tab} />
-        ))}
-        {
-          session.changes.map((change) => {
-            return <Chnage session={session} change={change}/>
-          })
-        } 
-      </div>
-      <div className="flex space-x-4 mt-4">
+      {!isCollapsed && <>
+        <div className="space-y-4">
+          <p className="font-semibold">Base Snapshot:</p>
+          {session.baseSnapshot.tabs.map((tab: Tab, index: number) => (
+            <TabComponent key={index} tab={tab} />
+          ))}
+          <Button text="restore to base snapshot state" on_click={
+            async () => {
+              await SessionRestorer.restore_session_to_change(session,0) 
+            }
+          } />
+          {
+            session.changes.map((change) => {
+              return <Chnage session={session} change={change} />
+            })
+          }
+        </div>
 
-        {/**just to divide the custom components */}
-        <Button 
-          on_click={async () => {
-            await SessionRestorer.restore_session_to_change(session,session.changes[session.changes.length - 1].id)
-          }} 
-          text="Restore browser to latest state of the session" 
-        />
-        <Button 
-          on_click={async () => {
-            (user.setCurrentSession != undefined ?   user.setCurrentSession(session.id) : console.error("implement set function for session"))
-            await storageFunctions.current_session.set(session.id);
-            console.log("Session: ", user.currentSession);
-          }} 
-          text="Set as current session"
-        />
-      </div>
+      </>}
+        <div className="flex space-x-4 mt-4">
+
+        <button onClick={toggleCollapse} className="text-blue-500 hover:underline">
+            {isCollapsed ? 'Show Changes' : 'Hide Changes'}
+          </button>
+
+          {/**just to divide the custom components */}
+          <Button
+            on_click={async () => {
+              await SessionRestorer.restore_session_to_change(session, session.changes.length > 0 ? session.changes[session.changes.length - 1].id : 0)
+            }}
+            text="Restore browser to latest state of the session"
+          />
+          <Button
+            on_click={async () => {
+              (user.setCurrentSession != undefined ? user.setCurrentSession(session.id) : console.error("implement set function for session"))
+              await storageFunctions.current_session.set(session.id);
+              console.log("Session: ", user.currentSession);
+            }}
+            text="Set as current session"
+          />
+        </div>
+        
     </div>
   );
 };
+
 
 export const TabsWrapperComponent: React.FC<{ username: string | undefined }> = ({ username }) => {
   const [global, setGlobal] = useState<{ sessions: Session[] | undefined }>({

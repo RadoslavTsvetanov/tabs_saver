@@ -51,7 +51,6 @@ private static construct_tab_list_to_change(session: Session, change_id: number)
     static async  restore_session_to_change(session: Session, change_id: number) {
         await storageFunctions.is_a_session_being_restored.set(true)
 
-
         this.construct_tab_list_to_change(session, change_id).forEach((tab) => {
         TabManager.openTab(tab.url)
 
