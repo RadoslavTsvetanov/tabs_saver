@@ -1,4 +1,4 @@
-import { changes } from "../../../backend/src/models/Users";
+import { changes } from "../models/Users";
 
  class ChromeStorage {
   static async get_value(key: string) {

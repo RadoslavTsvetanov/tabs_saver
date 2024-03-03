@@ -1,4 +1,4 @@
-import { Session,changes } from "../../../backend/src/models/Users";
+import { Session,changes } from "../models/Users";
 
 const tabsArray = [
   {

@@ -1,4 +1,4 @@
-import { Tab, Change, Snapshot } from "../../../backend/src/models/Users";
+import { Tab, Change, Snapshot } from "../models/Users";
 
 export class TabManager {
   static createTabObjectForApi(tab: Tab) {

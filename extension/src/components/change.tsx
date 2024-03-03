@@ -1,4 +1,4 @@
-import { Change, Session } from "../../../backend/src/models/Users";
+import { Change, Session } from "../models/Users";
 import { Button } from "./simple_button";
 import { TabComponent } from "./tabs";
 import { SessionRestorer} from "../utils/sessionRestorer";

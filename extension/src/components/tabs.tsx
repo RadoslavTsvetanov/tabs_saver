@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import React, { useEffect, useState, useContext } from "react";
-import { Tab, Session } from "../../../backend/src/models/Users";
+import { Tab, Session } from "../models/Users";
 import { UserContext } from "../utils/constext";
 import { TabManager } from "../utils/tabs";
 import { testdata } from "../static_dev_data/session";

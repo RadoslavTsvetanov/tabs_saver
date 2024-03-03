@@ -2,7 +2,7 @@
 
 import { TabManager } from "./tabs";
 import { storageFunctions } from "./webStorage";
-import { Session, Tab, changes } from "../../../backend/src/models/Users";
+import { Session, Tab, changes } from "../models/Users";
 
 export class SessionRestorer{
 
