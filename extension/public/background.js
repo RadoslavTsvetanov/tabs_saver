@@ -129,20 +129,40 @@ class TabEventListenerManager {
 }
 
 const tabEventManager = new TabEventListenerManager();
-
+let last_update = undefined;
 // Add event listeners
 tabEventManager.addEventListener("onCreated", (tab) => {
   console.log("Added");
   console.log("tab", tab);
 });
 
-tabEventManager.addEventListener("onUpdated", (tabId, changeInfo, tab) => {
-  console.log("Updated");
-  console.dir("tab", tab);
-  console.dir("chnageInfo", changeInfo);
-  console.dir("tabId", tabId);
-  // Custom logic for tab update
-});
+tabEventManager.addEventListener(
+  "onUpdated",
+  async (tabId, changeInfo, tab) => {
+    // since when updating a tab it gies through multiple update steps to not flood the db with unnecessary updates we check if the last updated tab sent is the same as the current one to check if it is the same change
+    if (tab.status === "loading") {
+      return;
+    }
+
+    console.log("last update", last_update);
+    if (last_update !== undefined) {
+      if (last_update.url === tab.url && last_update.id === tab.id) {
+        return;
+      }
+    }
+
+    last_update = {
+      url: tab.url,
+      id: tab.id,
+    };
+    tab.favIconUrl = "";
+    //? ask if i should move this in in its own function to improve readability
+    console.log("Updated");
+    console.dir("tab", tab);
+    console.dir("tabId", tabId);
+    // Custom logic for tab update
+  }
+);
 
 // Add more listener objects as needed
 

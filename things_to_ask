@@ -1,2 +1,3 @@
 ask if i should maintain individual state for each session since they will be updated regularly in their own. E.g. the active session will be updated regularly
 since restoring browser to current state will log to the vent listeners will it be a good idea to just have a variable in storage that changes when i am restoring (example is_restoring_to_state and if it is true the listenes wont send thr changes to api)
+askfor the async problem wuth the event listeners
