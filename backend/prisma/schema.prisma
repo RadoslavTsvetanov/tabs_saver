@@ -1,9 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -13,7 +7,6 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// schema.prisma// schema.prisma
 model User {
   id         Int       @id @default(autoincrement())
   is_premium Boolean
@@ -36,8 +29,8 @@ model Change {
   id             Int     @id @default(autoincrement())
   type_of_change String
   tabId          Int
-  sessionId      Int
   tab            Tab     @relation(fields: [tabId], references: [id])
+  sessionId      Int
   session        Session @relation(fields: [sessionId], references: [id])
 }
 
@@ -46,13 +39,13 @@ model Tab {
   tab_id_given_from_chrome_api Int
   url                          String
   title                        String
-  Change                       Change[]
-  Snapshot                     Snapshot? @relation(fields: [snapshotId], references: [id])
   snapshotId                   Int?
+  Snapshot                     Snapshot? @relation(fields: [snapshotId], references: [id])
+  Change                       Change[]
 }
 
 model Snapshot {
-  id      Int       @id @default(autoincrement())
-  tabs    Tab[]
-  Session Session[]
+  id       Int       @id @default(autoincrement())
+  tabs     Tab[]
+  sessions Session[]
 }

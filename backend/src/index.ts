@@ -1,6 +1,7 @@
 import express, { Request, Response } from 'express';
 import { DbRepo } from './db_repo';
-import { Change } from './models/Users';
+
+
 const app = express();
 const db_repo = new DbRepo();
 
@@ -10,7 +11,7 @@ app.post("/user",async (req: Request, res: Response) => {
     const {name, email} = req.body
     
     try {
-        const user = await db_repo.createUser(name, email, undefined)
+        const user = await db_repo.createUser(name, email)
         if (user == null || user == undefined) {
             return res.status(500).json("error creating user")
         }
