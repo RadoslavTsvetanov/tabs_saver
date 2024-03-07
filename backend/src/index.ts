@@ -1,5 +1,5 @@
 import express, { Request, Response } from 'express';
-import { DbRepo } from './db_repo';
+import { DB } from './db_repo';
 
 
 const app = express();
