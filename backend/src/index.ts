@@ -1,9 +1,10 @@
 import express, { Request, Response } from 'express';
+import { Change } from '@prisma/client';
 import { DB } from './db_repo';
 
 
 const app = express();
-const db_repo = new DbRepo();
+const db_repo = new DB();
 
 app.use(express.json());
 
@@ -27,7 +28,7 @@ app.get('/user/:username',async (req: Request, res: Response) => {
   res.status(200).json();
     const username = req.params.username
     try {
-        const user = await db_repo.getUserByName(username)
+        const user = await db_repo.getUser(username)
         return user
     } catch (error) {
         
@@ -57,7 +58,6 @@ app.post("/tabs/new_session", (req, res) => {
 
 app.get("/tabs/session", (req, res) => {
   try {
-    const session = db_repo.get_session()
   } catch (error){
   console.log(error)
     

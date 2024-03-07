@@ -1,14 +1,43 @@
-FROM node:14 AS build
-WORKDIR /app
+# base
+FROM node:alpine AS base
+
+WORKDIR /usr/src/app
+
 COPY package*.json ./
+
 RUN npm install
+
 COPY . .
+
+# for lint
+
+FROM base as linter
+
+WORKDIR /usr/src/app
+
+RUN npm run lint
+
+# for build
+
+FROM linter as builder
+
+WORKDIR /usr/src/app
+
 RUN npm run build
 
-FROM node:14-alpine
-WORKDIR /app
+
+# for production
+
+FROM node:alpine
+
+WORKDIR /usr/src/app
+
 COPY package*.json ./
+
 RUN npm install --only=production
-COPY --from=build /app/dist ./dist
+
+COPY --from=builder /usr/src/app/dist ./
+
 EXPOSE 3000
-CMD ["npm", "start"]
+
+ENTRYPOINT ["node","./app.js"]

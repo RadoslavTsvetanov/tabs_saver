@@ -1,3 +1,4 @@
+import { Snapshot } from "@prisma/client"
 import {DB} from "../src/db_repo"
  enum changes{
     CLOSED_TAB = "closedTab",
@@ -31,10 +32,9 @@ let user
 
 
 
-db.addChange(3,{type_of_change: changes.CHANGED_TAB,tab:{tab_id_given_from_chrome_api:1,title:"hoho",url:"jiji"}})
-
+// db.addChange(3,{type_of_change: changes.CHANGED_TAB,tab:{tab_id_given_from_chrome_api:1,title:"hoho",url:"jiji"}})
 
 
 db.getSession(3).then((session) => {
-  console.log(session)
-})
+  console.log(session?.baseSnapshot?.tabs);
+});
