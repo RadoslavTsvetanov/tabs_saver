@@ -1,14 +1,11 @@
 const axios = require("axios");
 
-// Define the base URL
 const baseURL = "http://localhost:3000";
 
-// Function to handle errors
 function handleError(error) {
   console.error("Error:", error.response.data);
 }
 
-// Create a new user
 async function createUser(name, email) {
   try {
     const response = await axios.post(`${baseURL}/user`, { name, email });
@@ -19,7 +16,6 @@ async function createUser(name, email) {
   }
 }
 
-// Add a session to a user
 async function addSessionToUser(userId, session) {
   try {
     const response = await axios.post(`${baseURL}/user/${userId}/session`, {
@@ -32,7 +28,6 @@ async function addSessionToUser(userId, session) {
   }
 }
 
-// Add a change to a session
 async function addChangeToSession(sessionId, change) {
   try {
     const response = await axios.post(
@@ -46,7 +41,6 @@ async function addChangeToSession(sessionId, change) {
   }
 }
 
-// Get a session by ID
 async function getSession(sessionId) {
   try {
     const response = await axios.get(`${baseURL}/session/${sessionId}`);
@@ -57,7 +51,6 @@ async function getSession(sessionId) {
   }
 }
 
-// Get a user by username
 async function getUser(username) {
   try {
     const response = await axios.get(`${baseURL}/user/${username}`);
@@ -68,12 +61,9 @@ async function getUser(username) {
   }
 }
 
-// Test the API endpoints
 (async () => {
-  // Create a user
   const user = await createUser("pipe", "john@example.com");
 
-  // Add a session to the user
   const session = await addSessionToUser(user.id, {
     creation_date: new Date(),
     BaseSnapshotData: {
@@ -87,7 +77,6 @@ async function getUser(username) {
     },
   });
 
-  // Add a change to the session
   await addChangeToSession(session.id, {
     type_of_change: "Change Type",
     tab: {
@@ -97,9 +86,7 @@ async function getUser(username) {
     },
   });
 
-  // Get the session
   await getSession(session.id);
 
-  // Get the user
   await getUser("John Doe");
 })();

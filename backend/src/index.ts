@@ -2,13 +2,13 @@
 import express, { Request, Response } from 'express';
 import bodyParser from 'body-parser';
 import { DB } from './db_repo'; // Import your DB class from the file you've defined
-
+import cors from 'cors';
 // Create an instance of DB
 const db = new DB();
 
 // Create Express app
 const app = express();
-
+app.use(cors())
 // Middleware for parsing JSON bodies
 app.use(bodyParser.json());
 

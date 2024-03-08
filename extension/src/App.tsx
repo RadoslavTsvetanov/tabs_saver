@@ -3,17 +3,23 @@ import { LoginForm, SignUpForm } from './components/auth';
 import { storageFunctions } from './utils/webStorage';
 import { CurrentSession, TabsWrapperComponent } from './components/tabs';
 import { UserContext } from './utils/constext';
-
+import { Button } from './components/simple_button';
+import { Loading } from './components/loading';
 
 const Main: React.FC = () => {
   const { username } = useContext(UserContext);
-
+  const [debug_rloader,set_debug_reloader] = useState(0) // no real maening to the value type this state is purely for rerendering the component for debugging purposes
   return (
     <>
-     <div className="flex flex-col items-center">
-      <div className="text-xl text-center mt-4">{username ? username : "Loading..."}</div>
+      <div className="flex flex-col items-center">
+        
+        <Button text={`reload: ${debug_rloader}`} on_click={() => {
+          set_debug_reloader((prev) => {
+            return prev + 1
+          })
+    }}/>
       <div className="flex">
-        <TabsWrapperComponent username={username ? username : undefined} />
+          {username !== undefined ? <TabsWrapperComponent username={username} /> : <Loading text={ "no username "} />}
         <CurrentSession />
       </div>
     </div>

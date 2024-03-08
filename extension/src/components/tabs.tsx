@@ -3,20 +3,20 @@ import React, { useEffect, useState, useContext } from "react";
 import { Tab, Session } from "../models/Users";
 import { UserContext } from "../utils/constext";
 import { TabManager } from "../utils/tabs";
-import { testdata } from "../static_dev_data/session";
 import { Loading } from "./loading";
-import { Button } from "./simple_button"; 
+import { Button } from "./simple_button";
 import { storageFunctions } from "../utils/webStorage";
 import { Chnage } from "./change";
 import { SessionRestorer } from "../utils/sessionRestorer";
+import { api } from "../utils/api"
 export const TabComponent: React.FC<{ tab: Tab }> = ({ tab }) => {
   return (
     <div className="border border-gray-400 rounded p-4 m-2 shadow-md hover:shadow-lg">
       <p className="font-bold text-lg">TITLE: {tab.title}</p>
       <p className="text-blue-500">URL: {tab.url}</p>
       <Button text="Open Tab" on_click={() => {
-TabManager.openTab(tab.url);
-      }}/>
+        TabManager.openTab(tab.url);
+      }} />
 
     </div>
   );
@@ -41,7 +41,7 @@ const SessionComponent: React.FC<{ session: Session }> = ({ session }) => {
           ))}
           <Button text="restore to base snapshot state" on_click={
             async () => {
-              await SessionRestorer.restore_session_to_change(session,0) 
+              await SessionRestorer.restore_session_to_change(session, 0)
             }
           } />
           {
@@ -52,67 +52,87 @@ const SessionComponent: React.FC<{ session: Session }> = ({ session }) => {
         </div>
 
       </>}
-        <div className="flex space-x-4 mt-4">
+      <div className="flex space-x-4 mt-4">
 
         <button onClick={toggleCollapse} className="text-blue-500 hover:underline">
-            {isCollapsed ? 'Show Changes' : 'Hide Changes'}
-          </button>
+          {isCollapsed ? 'Show Changes' : 'Hide Changes'}
+        </button>
 
-          {/**just to divide the custom components */}
-          <Button
-            on_click={async () => {
-              await SessionRestorer.restore_session_to_change(session, session.changes.length > 0 ? session.changes[session.changes.length - 1].id : 0)
-            }}
-            text="Restore browser to latest state of the session"
-          />
-          <Button
-            on_click={async () => {
-              (user.setCurrentSession != undefined ? user.setCurrentSession(session.id) : console.error("implement set function for session"))
-              await storageFunctions.current_session.set(session.id);
-              console.log("Session: ", user.currentSession);
-            }}
-            text="Set as current session"
-          />
-        </div>
-        
+        {/**just to divide the custom components */}
+        <Button
+          on_click={async () => {
+            await SessionRestorer.restore_session_to_change(session, session.changes.length > 0 ? session.changes[session.changes.length - 1].id : 0)
+          }}
+          text="Restore browser to latest state of the session"
+        />
+        <Button
+          on_click={async () => {
+            await storageFunctions.current_session.set(session.id);
+            console.log("Session: ", user.currentSession);
+          }}
+          text="Set as current session"
+        />
+      </div>
+
     </div>
   );
 };
 
-
-export const TabsWrapperComponent: React.FC<{ username: string | undefined }> = ({ username }) => {
-  const [global, setGlobal] = useState<{ sessions: Session[] | undefined }>({
+export const TabsWrapperComponent: React.FC<{ username: string }> = ({ username }) => {
+  const [global, setGlobal] = useState<{ sessions: Session[] | undefined, trigger_reload: number }>({
     sessions: undefined,
+    trigger_reload: 0
   });
 
-const {currentSession} = useContext(UserContext)
-  function changeGlobal<V>(key: string, val: V) {
+  const { currentSession } = useContext(UserContext);
+function changeGlobal<V>(key: string, val: V) {
     setGlobal((prevGlobal) => ({
       ...prevGlobal,
       [key]: val,
     }));
   }
-
   useEffect(() => {
-    if (username !== undefined) {
-      changeGlobal<Session[]>("sessions", testdata);
-      if (!(currentSession === undefined || currentSession === -1)) {
-  global.sessions = global.sessions?.filter((session) => session.id !== currentSession);
-}
+    console.log('useEffect', username);
 
-      console.dir("Sessions", global.sessions);
+    async function fetchData() {
+      if (username !== undefined) {
+        console.log("changing");
+        const data = await api.getUser(username);
+        console.log("sessions->",data)
+        changeGlobal("sessions",data.sessions)
+      }
     }
-  }, [currentSession,username]); //intentionally made so that global.sessions does not trigger unnecessary rerenders
+
+    fetchData();
+
+  }, [username]); 
+
+  // useEffect(() => {
+  //   if (!(currentSession === undefined || currentSession === -1)) {
+  //     setGlobal(prevGlobal => ({
+  //       ...prevGlobal,
+  //       sessions: prevGlobal.sessions?.filter((session) => session.id !== currentSession)
+  //     }));
+  //   }
+  // }, [currentSession]); 
 
   return (
     <div className="flex flex-wrap">
       {global.sessions !== undefined ? (
-        global.sessions.map((session, index) => (
-          <SessionComponent key={index} session={session} />
-        ))
+        global.sessions.map((session, index) => {
+          if(session.id === currentSession){
+            return <></>
+          }
+          return <SessionComponent key={index} session={session} />
+})
       ) : (
-        <div>Loading ...</div>
-      )}
+          <>
+            <Loading text="sessions" />
+            <Button text="reload" on_click={() => {
+              setGlobal(prevGlobal => ({ ...prevGlobal, trigger_reload: prevGlobal.trigger_reload + 1 }));
+            }} />
+          </>
+        )}
     </div>
   );
 };
@@ -123,34 +143,39 @@ export const CurrentSession: React.FC = () => {
 
   useEffect(() => {
     async function fetchData() {
-      const data = testdata[context !== undefined && context.currentSession ? context.currentSession - 1 : 0]; /*await api.get_session(name) */ //TODO
-      setSessionData(data);
+      if (context.currentSession === undefined) {
+        console.log("no session selected");
+        return;
+      }
+      const data = await api.getSession(context.currentSession);
+      console.log("api res", data);
+      setSessionData(data.data);
     }
     fetchData();
-  }, [context]);
+  }, [context.currentSession, context]); // Re-run useEffect only when context.currentSession or context changes
 
   return (
     <>
       {sessionData !== undefined ? (
         <SessionComponent session={sessionData} />
       ) : (
-        <Loading text={"Sessions"} />
-      )}
+          <Loading text={"Sessions"} />
+        )}
     </>
   );
 };
 
 export const NewSession: React.FC = () => {
-    return (
-      <div className="mt-8">
-        <Button 
-          text={"Start new browser session"} 
-          on_click={() => {
-            TabManager.logAllTabs()
+  return (
+    <div className="mt-8">
+      <Button
+        text={"Start new browser session"}
+        on_click={() => {
+          TabManager.logAllTabs();
 
-            //TODO call API to create session and assign this id to the current session 
-          }}
-        />
-      </div>
-    );
-}
+          //TODO call API to create session and assign this id to the current session
+        }}
+      />
+    </div>
+  );
+};

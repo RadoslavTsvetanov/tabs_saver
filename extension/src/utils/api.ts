@@ -1,56 +1,86 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-import axios from "axios";
+import axios, { AxiosResponse } from 'axios';
+import {User,Session,Change} from "../models/Users"
+// Define interfaces for the data types used in the endpoints
 
-interface Result {
-  data: any;
+interface UserResponse {
+  data: User;
   status: number;
-  err: string | undefined;
+  err?: string;
 }
 
-interface RequestOptions {
-  method: 'GET' | 'POST';
-  endpoint: string;
-  data?: any;
-  headers?: any;
+interface SessionResponse {
+  data: Session;
+  status: number;
+  err?: string;
 }
 
-export class ApiClient {
-    private baseUrl: string;
-
-    constructor(baseUrl: string) {
-        this.baseUrl = baseUrl;
-    }
-
-    private static buildResponse(data: any, status: number, err: string | undefined): Result {
-        return {
-            data: data,
-            status: status,
-            err: err
-        };
-    }
-
-    private async axiosRequest(options: RequestOptions): Promise<Result> {
-        try {
-            const config = {
-                method: options.method,
-                url: `${this.baseUrl}/${options.endpoint}`,
-                data: options.method === 'POST' ? options.data : undefined,
-                params: options.method === 'GET' ? options.data : undefined,
-                headers: options.headers,
-            };
-
-            const response = await axios(config);
-            return ApiClient.buildResponse(response.data, response.status, undefined);
-        } catch (error: any) {
-            console.error('Request error:', error);
-            return ApiClient.buildResponse({}, error.response ? error.response.status : 500, error.message);
-        }
-    }
-
-    async getRequest(endpoint: string, reqData: object, headers?: any): Promise<Result> {
-        return await  this.axiosRequest({ method: 'GET', endpoint, data: reqData, headers });
-    }
-    async postRequest(endpoint: string, reqData: object, headers?: any): Promise<Result> {
-        return await this.axiosRequest({ method: 'POST', endpoint, data: reqData, headers });
-    }
+interface ChangeResponse {
+  data: Change;
+  status: number;
+  err?: string;
 }
+
+// Define the API class
+
+export class API {
+  private baseURL: string;
+
+  constructor(baseURL: string) {
+    this.baseURL = baseURL;
+  }
+
+  async createUser(name: string, email: string | null = null): Promise<UserResponse> {
+    try {
+      const response: AxiosResponse<UserResponse> = await axios.post<UserResponse>(`${this.baseURL}/user`, { name, email });
+      return response.data;
+    } catch (error) {
+      throw new Error('Error creating user');
+    }
+  }
+
+  async addSessionToUser(userId: number, session: Session): Promise<SessionResponse> {
+    try {
+      const response: AxiosResponse<SessionResponse> = await axios.post<SessionResponse>(`${this.baseURL}/user/${userId}/session`, { session });
+      return response.data;
+    } catch (error) {
+      throw new Error('Error adding session to user');
+    }
+  }
+
+  async addChangeToSession(sessionId: number, change: Change): Promise<ChangeResponse> {
+    try {
+      const response: AxiosResponse<ChangeResponse> = await axios.post<ChangeResponse>(`${this.baseURL}/session/${sessionId}/change`, { change });
+      return response.data;
+    } catch (error) {
+      throw new Error('Error adding change to session');
+    }
+  }
+
+  async getSession(sessionId: number): Promise<SessionResponse> {
+    try {
+      const response: AxiosResponse<SessionResponse> = await axios.get<SessionResponse>(`${this.baseURL}/session/${sessionId}`);
+      return response.data;
+    } catch (error) {
+      throw new Error('Error retrieving session');
+    }
+  }
+
+  async getUser(username: string): Promise<User> {
+    try {
+      const response: AxiosResponse<User> = await axios.get<User>(`${this.baseURL}/user/${username}`);
+      console.log("res",response)
+      
+      return response.data;
+    } catch (error) {
+      throw new Error('Error retrieving user');
+    }
+  }
+}
+
+
+
+export const api = new API(import.meta.env.VITE_BACKEND_URL)
+
+console.log(async () => {
+  await api.getUser('John Doe')
+})
