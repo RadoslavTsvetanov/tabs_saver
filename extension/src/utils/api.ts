@@ -1,84 +1,56 @@
-// /* eslint-disable @typescript-eslint/no-explicit-any */
-// import axios from "axios"
-// interface Result {
-//   data: object;
-//   status: number;
-//   err: string | undefined;
-// }
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import axios from "axios";
 
-// interface Headers {
-//   authorization: string;
-// }
+interface Result {
+  data: any;
+  status: number;
+  err: string | undefined;
+}
 
-// enum REQUEST_TYPE {
-//   POST = 'POST',
-//   GET = 'GET',
-// }
+interface RequestOptions {
+  method: 'GET' | 'POST';
+  endpoint: string;
+  data?: any;
+  headers?: any;
+}
 
-// export class ApiClient {
-//   private baseUrl: string;
+export class ApiClient {
+    private baseUrl: string;
 
-//   constructor(baseUrl: string) {
-//     this.baseUrl = baseUrl;
-//   }
+    constructor(baseUrl: string) {
+        this.baseUrl = baseUrl;
+    }
 
-//   static build_response(data: object, status: number, err: string | undefined): Result {
-//     return {
-//       data: data,
-//       status: status,
-//       err: err
-//     };
-//   }
+    private static buildResponse(data: any, status: number, err: string | undefined): Result {
+        return {
+            data: data,
+            status: status,
+            err: err
+        };
+    }
 
-//   private async axiosRequest(
-//     method: REQUEST_TYPE,
-//     endpoint: string,
-//     reqData: object,
-//     headers: Headers | object | undefined
-//   ): Promise<Result> {
-//     try {
-//       const config = {
-//         method: method,
-//         url: `${this.baseUrl}/${endpoint}`,
-//         data: method === REQUEST_TYPE.POST ? reqData : undefined,
-//         params: method === REQUEST_TYPE.GET ? reqData : undefined,
-//         headers: headers,
-//       };
+    private async axiosRequest(options: RequestOptions): Promise<Result> {
+        try {
+            const config = {
+                method: options.method,
+                url: `${this.baseUrl}/${options.endpoint}`,
+                data: options.method === 'POST' ? options.data : undefined,
+                params: options.method === 'GET' ? options.data : undefined,
+                headers: options.headers,
+            };
 
-//       const response = await axios(config);
-//       return ApiClient.build_response(response.data, response.status, undefined);
-//     } catch (error: any) {
-//       console.error('Request error:', error);
-//       return ApiClient.build_response({}, error.response ? error.response.status : 500, error.message);
-//     }
-//   }
+            const response = await axios(config);
+            return ApiClient.buildResponse(response.data, response.status, undefined);
+        } catch (error: any) {
+            console.error('Request error:', error);
+            return ApiClient.buildResponse({}, error.response ? error.response.status : 500, error.message);
+        }
+    }
 
-//   async getRequest(endpoint: string, reqData: object, headers: Headers | object | undefined): Promise<Result> {
-//     return this.axiosRequest(REQUEST_TYPE.GET, endpoint, reqData, headers);
-//   }
-
-//   async postRequest(endpoint: string, reqData: object, headers: undefined | Headers | object): Promise<Result> {
-//     return this.axiosRequest(REQUEST_TYPE.POST, endpoint, reqData, headers);
-//   }
-
-//   // Static methods
-//   static async staticGetRequest(baseUrl: string, headers: Headers | object | undefined): Promise<Result> {
-//     try {
-//       const res = await axios.get(baseUrl, { headers });
-//       return ApiClient.build_response(res.data, res.status, undefined);
-//     } catch (error:any) {
-//       console.error('Static GET request error:', error);
-//       return ApiClient.build_response({}, error.response ? error.response.status : 500, error.message);
-//     }
-//   }
-
-//   static async staticPostRequest(baseUrl: string, reqData: object, headers: Headers | object | undefined): Promise<Result> {
-//     try {
-//       const res = await axios.post(baseUrl, {reqData}, { headers });
-//       return ApiClient.build_response(res.data, res.status, undefined);
-//     } catch (error:any) {
-//       console.error('Static POST request error:', error);
-//       return ApiClient.build_response({}, error.response ? error.response.status : 500, error.message);
-//     }
-//   }
-// }
+    async getRequest(endpoint: string, reqData: object, headers?: any): Promise<Result> {
+        return await  this.axiosRequest({ method: 'GET', endpoint, data: reqData, headers });
+    }
+    async postRequest(endpoint: string, reqData: object, headers?: any): Promise<Result> {
+        return await this.axiosRequest({ method: 'POST', endpoint, data: reqData, headers });
+    }
+}

@@ -1,72 +1,78 @@
+// Import necessary modules
 import express, { Request, Response } from 'express';
-import { Change } from '@prisma/client';
-import { DB } from './db_repo';
+import bodyParser from 'body-parser';
+import { DB } from './db_repo'; // Import your DB class from the file you've defined
 
+// Create an instance of DB
+const db = new DB();
 
+// Create Express app
 const app = express();
-const db_repo = new DB();
 
-app.use(express.json());
+// Middleware for parsing JSON bodies
+app.use(bodyParser.json());
 
-app.post("/user",async (req: Request, res: Response) => {
-    const {name, email} = req.body
-    
-    try {
-        const user = await db_repo.createUser(name, email)
-        if (user == null || user == undefined) {
-            return res.status(500).json("error creating user")
-        }
-        return res.status(200).json(user)
-    } catch (error) {
-        
-    }
-})
+// Define routes
 
-
-
-app.get('/user/:username',async (req: Request, res: Response) => {
-  res.status(200).json();
-    const username = req.params.username
-    try {
-        const user = await db_repo.getUser(username)
-        return user
-    } catch (error) {
-        
-    }
-});
-
-app.post('tabs/change',async (req: Request, res: Response) => {
-  const { username,change, tab_session_name }:{username: string,change: Change, tab_session_name: string} = req.body;
-        
-
-
+// Create a new user
+app.post('/user', async (req: Request, res:Response) => {
   try {
-    
-  } catch (e) {
-    console.log(e)
+    const { name, email } = req.body;
+    const newUser = await db.createUser(name, email);
+    res.json(newUser);
+  } catch (error) {
+    res.status(500).json({ error: 'Error creating user' });
   }
-
-  return res.status(200).json({
-    
-  });
 });
 
-app.post("/tabs/new_session", (req, res) => {
-
-  return res.status(200).json()
-})
-
-app.get("/tabs/session", (req, res) => {
+// Add a session to a user
+app.post('/user/:userId/session', async (req: Request, res: Response) => {
   try {
-  } catch (error){
-  console.log(error)
-    
+    const userId = parseInt(req.params.userId);
+    const {session
+  } = req.body;
+    const newSession = await db.addSession(userId, session);
+    res.json(newSession);
+  } catch (error) {
+    res.status(500).json({ error: 'Error adding session to user' });
   }
-})
-
-
-const port = 3000;
-
-app.listen(port, () => {
-  console.log(`Server is listening on port ${port}`);
 });
+
+app.post('/session/:sessionId/change', async (req: Request, res: Response) => {
+  try {
+    const sessionId = parseInt(req.params.sessionId);
+    const {change} = req.body;
+    const newChange = await db.addChange(sessionId, change);
+    res.json(newChange);
+  } catch (error) {
+    res.status(500).json({ error: 'Error adding change to session' });
+  }
+});
+
+
+app.get('/session/:sessionId', async (req: Request, res: Response) => {
+  try {
+    const sessionId = parseInt(req.params.sessionId);
+    const session = await db.getSession(sessionId);
+    res.json(session);
+  } catch (error) {
+    res.status(500).json({ error: 'Error retrieving session' });
+  }
+});
+
+app.get('/user/:username', async (req: Request, res: Response) => {
+  try {
+    const username = req.params.username;
+    const user = await db.getUser(username);
+    res.json(user);
+  } catch (error) {
+    res.status(500).json({ error: 'Error retrieving user' });
+  }
+});
+
+
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+  console.log(`Server is running on port ${PORT}`);
+});
+ 
