@@ -9,17 +9,9 @@ RUN npm install
 
 COPY . .
 
-# for lint
 
-FROM base as linter
 
-WORKDIR /usr/src/app
-
-RUN npm run lint
-
-# for build
-
-FROM linter as builder
+FROM base as builder
 
 WORKDIR /usr/src/app
 

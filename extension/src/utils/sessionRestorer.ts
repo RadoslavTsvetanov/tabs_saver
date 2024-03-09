@@ -1,5 +1,3 @@
-
-
 import { TabManager } from "./tabs";
 import { storageFunctions } from "./webStorage";
 import { Session, Tab, changes } from "../models/Users";

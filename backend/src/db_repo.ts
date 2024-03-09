@@ -119,7 +119,12 @@ async addChange(sessionId: number, change: { type_of_change: string, tab: { tab_
             include: {
                 sessions: {
                     include: {
-                        baseSnapshot: true,
+                    baseSnapshot: {
+                      include:{
+                        tabs: true
+                      }
+                    },
+                      
                         changes: true,
                     }
                 },

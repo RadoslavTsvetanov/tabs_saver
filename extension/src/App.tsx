@@ -33,7 +33,6 @@ function App() {
   const [isLoginSelected, setIsLoginSelected] = useState<boolean>(true);
 
   useEffect(() => {
-    console.log("momomomomomomomomomo",import.meta.env)
     const fetchData = async () => {
       const name = await storageFunctions.username.get();
       setUsername(name);

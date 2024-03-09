@@ -56,9 +56,9 @@ export class API {
     }
   }
 
-  async getSession(sessionId: number): Promise<SessionResponse> {
+  async getSession(sessionId: number): Promise<Session> {
     try {
-      const response: AxiosResponse<SessionResponse> = await axios.get<SessionResponse>(`${this.baseURL}/session/${sessionId}`);
+      const response: AxiosResponse<Session> = await axios.get<Session>(`${this.baseURL}/session/${sessionId}`);
       return response.data;
     } catch (error) {
       throw new Error('Error retrieving session');
