@@ -8,12 +8,6 @@ interface UserResponse {
   err?: string;
 }
 
-interface SessionResponse {
-  data: Session;
-  status: number;
-  err?: string;
-}
-
 interface ChangeResponse {
   data: Change;
   status: number;
@@ -42,16 +36,12 @@ export class API {
     }
   }
 
-  async addSessionToUser(
-    userId: number,
-    session: Session
-  ): Promise<SessionResponse> {
+  async addSessionToUser(userId: number, session: Session): Promise<Session> {
     try {
-      const response: AxiosResponse<SessionResponse> =
-        await axios.post<SessionResponse>(
-          `${this.baseURL}/user/${userId}/session`,
-          { session }
-        );
+      const response: AxiosResponse<Session> = await axios.post<Session>(
+        `${this.baseURL}/user/${userId}/session`,
+        { session }
+      );
       return response.data;
     } catch (error) {
       throw new Error("Error adding session to user");

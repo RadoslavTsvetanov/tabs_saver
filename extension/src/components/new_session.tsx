@@ -1,10 +1,12 @@
 import { Button } from "./simple_button";
 import { TabManager } from "../utils/tabs";
-import { useState } from "react";
+import { useState, useContext } from "react";
 import { api } from "../utils/api";
 import { Tab } from "../models/Users";
+import { UserContext } from "../utils/constext";
 export const NewSession: React.FC<{ userId: number }> = ({ userId }) => {
   const [is_form_toggled] = useState(false);
+  const user = useContext(UserContext);
   return (
     <div className="mt-8">
       <Button
@@ -23,7 +25,7 @@ export const NewSession: React.FC<{ userId: number }> = ({ userId }) => {
             changes: [],
           });
           console.log("new session -> ", new_session);
-          //   await user.setCurrentSession(new_sesion.)
+          await user.setCurrentSession(new_session.id);
         }}
       />
       {is_form_toggled ?? (
