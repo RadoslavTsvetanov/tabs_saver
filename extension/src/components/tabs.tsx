@@ -7,7 +7,7 @@ import { Button } from "./simple_button";
 import { Chnage } from "./change";
 import { SessionRestorer } from "../utils/sessionRestorer";
 import { api } from "../utils/api";
-
+import { NewSession } from "./new_session";
 export const TabComponent: React.FC<{ tab: Tab }> = ({ tab }) => {
   return (
     <div className="border border-gray-400 rounded p-4 m-2 shadow-md hover:shadow-lg">
@@ -25,7 +25,9 @@ const SessionComponent: React.FC<{ session: Session }> = ({ session }) => {
 
   return (
     <div className="border border-gray-400 rounded p-4 m-2 shadow-md">
-      <div className="text-gray-600 mb-4">Created at: {new Date(session.creation_date).toLocaleString()}</div>
+      <div className="text-gray-600 mb-4">
+        Created at: {new Date(session.creation_date).toLocaleString()}
+      </div>
       {!isCollapsed && (
         <>
           <div className="space-y-4">
@@ -33,44 +35,59 @@ const SessionComponent: React.FC<{ session: Session }> = ({ session }) => {
             {session.baseSnapshot.tabs.map((tab: Tab, index: number) => (
               <TabComponent key={index} tab={tab} />
             ))}
-            <Button text="restore to base snapshot state" on_click={async () => await SessionRestorer.restore_session_to_change(session, 0)} />
-            {session.changes.map((change) => <Chnage session={session} change={change} />)}
+            <Button
+              text="restore to base snapshot state"
+              on_click={async () =>
+                await SessionRestorer.restore_session_to_change(session, 0)
+              }
+            />
+            {session.changes.map((change) => (
+              <Chnage session={session} change={change} />
+            ))}
           </div>
         </>
       )}
       <div className="flex space-x-4 mt-4">
-        <button onClick={toggleCollapse} className="text-blue-500 hover:underline">
-          {isCollapsed ? 'Show Changes' : 'Hide Changes'}
+        <button
+          onClick={toggleCollapse}
+          className="text-blue-500 hover:underline"
+        >
+          {isCollapsed ? "Show Changes" : "Hide Changes"}
         </button>
         <Button
-          on_click={
-            async () => {
-              await SessionRestorer.restore_session_to_change(session, session.changes.length >
-                0 ? session.changes[session.changes.length - 1].id : 0)
-            }
-          }
-          
+          on_click={async () => {
+            await SessionRestorer.restore_session_to_change(
+              session,
+              session.changes.length > 0
+                ? session.changes[session.changes.length - 1].id
+                : 0
+            );
+          }}
           text="Restore browser to latest state of the session"
         />
         <Button
           on_click={async () => {
             console.log("Setting current Session: ", session.id);
-            await user.setCurrentSession(session.id)
-            console.log("set current session -> ", user.currentSession)
-        }}
-          text="Set as current session" />
+            await user.setCurrentSession(session.id);
+            console.log("set current session -> ", user.currentSession);
+          }}
+          text="Set as current session"
+        />
       </div>
     </div>
   );
 };
 
-export const TabsWrapperComponent: React.FC<{ username: string }> = ({ username }) => {
+export const TabsWrapperComponent: React.FC<{ username: string }> = ({
+  username,
+}) => {
   const [sessions, setSessions] = useState<Session[] | undefined>(undefined);
-
+  const [userId, setUserId] = useState<number | undefined>(undefined);
   useEffect(() => {
     async function fetchData() {
       if (username) {
         const data = await api.getUser(username);
+        setUserId(data.id);
         setSessions(data.sessions);
       }
     }
@@ -80,7 +97,16 @@ export const TabsWrapperComponent: React.FC<{ username: string }> = ({ username 
   return (
     <div className="flex flex-wrap">
       {sessions ? (
-        sessions.map((session, index) => <SessionComponent key={index} session={session} />)
+        <>
+          {sessions.map((session, index) => (
+            <SessionComponent key={index} session={session} />
+          ))}
+          {userId !== undefined ? (
+            <NewSession userId={userId} />
+          ) : (
+            <Loading text="new session" />
+          )}
+        </>
       ) : (
         <>
           <Loading text="sessions" />
@@ -99,7 +125,7 @@ export const CurrentSession: React.FC = () => {
     async function fetchData() {
       if (context.currentSession !== undefined) {
         const data = await api.getSession(context.currentSession);
-        console.log("data from single session component", data)
+        console.log("data from single session component", data);
         setSessionData(data);
       }
     }
@@ -108,14 +134,11 @@ export const CurrentSession: React.FC = () => {
 
   return (
     <>
-      {sessionData ? <SessionComponent session={sessionData} /> : <Loading text={"Sessions"} />}
+      {sessionData ? (
+        <SessionComponent session={sessionData} />
+      ) : (
+        <Loading text={"Sessions"} />
+      )}
     </>
-  );
-};
-export const NewSession: React.FC = () => {
-  return (
-    <div className="mt-8">
-      <Button text={"Start new browser session"} on_click={() => TabManager.logAllTabs()} />
-    </div>
   );
 };

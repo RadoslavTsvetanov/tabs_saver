@@ -1,9 +1,8 @@
-
-export enum changes{
-    CLOSED_TAB = "closedTab",
-    CREATED_TAB = "createdTab",
-    CHANGED_TAB = "changedTab",
-    TAKEN_NEW_SNAPSHOT = "newSnapshot"
+export enum changes {
+  CLOSED_TAB = "closedTab",
+  CREATED_TAB = "createdTab",
+  CHANGED_TAB = "changedTab",
+  TAKEN_NEW_SNAPSHOT = "newSnapshot",
 }
 
 // types.ts
@@ -30,7 +29,7 @@ export interface Change {
 }
 
 export interface Tab {
-  id: number;
+  tab_id_given_from_chrome_api: number;
   url: string;
   title: string;
 }

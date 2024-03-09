@@ -1,10 +1,10 @@
-import  { createContext } from "react";
+import { createContext } from "react";
 
 export const UserContext = createContext<{
   username: string | undefined;
-  setUsername:  React.Dispatch<React.SetStateAction<string | undefined>>;
+  setUsername: React.Dispatch<React.SetStateAction<string | undefined>>;
   currentSession: number | undefined;
-  setCurrentSession:  ((val:number) =>  Promise<void>);
+  setCurrentSession: (val: number) => Promise<void>;
 }>({
   username: undefined,
   setUsername: () => {},
