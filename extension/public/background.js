@@ -1,3 +1,10 @@
+const changes = {
+  CLOSED_TAB: "closedTab",
+  CREATED_TAB: "createdTab",
+  CHANGED_TAB: "changedTab",
+  TAKEN_NEW_SNAPSHOT: "newSnapshot",
+};
+
 class ChromeStorage {
   static async getValue(key) {
     const result = await browser.storage.local.get(key);
@@ -16,34 +23,35 @@ const ActionType = {
 };
 
 class API {
-  constructor(endpoint) {
-    this.endpoint = endpoint;
+  constructor(baseUrl) {
+    this.baseUrl = baseUrl;
   }
 
-  async sendTabChange(tab, action, reqType) {
+  async addChangeToSession(sessionId, change) {
     try {
-      const req = this._makeRequest(tab, action, reqType);
-      const response = await fetch(this.endpoint, req);
+      const response = await fetch(
+        `${this.baseUrl}/session/${sessionId}/change`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ change }),
+        }
+      );
+
       if (!response.ok) {
         throw new Error(
           `Failed to send request: ${response.status} - ${response.statusText}`
         );
       }
-      const data = await response.json();
-      console.log("Request sent successfully:", data);
-    } catch (error) {
-      console.error("Error sending request:", error);
-    }
-  }
 
-  _makeRequest(tab, action, reqType) {
-    return {
-      method: reqType,
-      body: JSON.stringify({ tab, action }),
-      headers: {
-        "Content-Type": "application/json",
-      },
-    };
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      console.error("Error adding change to session:", error);
+      throw new Error("Error adding change to session");
+    }
   }
 }
 
@@ -94,7 +102,7 @@ class TabEventListenerManager {
     if (await this.shouldListenForTabs()) {
       console.log("args", argsObj.args);
       const tab = argsObj.args[0]; // Extract the tab from args array
-
+      console.log("first argument", tab);
       const callback = argsObj.callback;
       await callback(...argsObj.args);
     }
@@ -163,7 +171,19 @@ tabEventManager.addEventListener(
     // Custom logic for tab update
   }
 );
-
+tabEventManager.addEventListener("onRemoved", async (tabId, removedInfo) => {
+  console.log("tabche removed", tabId, removedInfo);
+  const currentSessionId = await ChromeStorage.getValue("current_session");
+  console.log("fetched session ->", currentSessionId);
+  await api.addChangeToSession(currentSessionId, {
+    type_of_change: changes.CLOSED_TAB,
+    tab: {
+      tab_id_given_from_api: tabId,
+      url: "none",
+      title: "none",
+    },
+  });
+});
 // Add more listener objects as needed
 
 // Set up all listeners

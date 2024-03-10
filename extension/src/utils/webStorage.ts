@@ -1,28 +1,27 @@
 import { changes } from "../models/Users";
 
- class ChromeStorage {
+class ChromeStorage {
   static async get_value(key: string) {
     const result = await chrome.storage.local.get(key);
     return result[key];
   }
 
-   static async set_value<V>(key: string, value: V) {
-      await chrome.storage.local.set({ [key]: value })
+  static async set_value<V>(key: string, value: V) {
+    await chrome.storage.local.set({ [key]: value });
   }
-
 }
 
-type StorageFunctions<V ,T extends Record<string, V | undefined>> = {
+type StorageFunctions<V, T extends Record<string, V | undefined>> = {
   [K in keyof T]: {
     get: () => Promise<T[K]>;
     set: (value: T[K]) => Promise<void>;
   };
 };
 
-function StorageBuilder<V,T extends Record<string, V>>(
+function StorageBuilder<V, T extends Record<string, V>>(
   schema: T
-): StorageFunctions<V,T> {
-  const storageFunctions = {} as StorageFunctions<V,T>;
+): StorageFunctions<V, T> {
+  const storageFunctions = {} as StorageFunctions<V, T>;
 
   for (const key in schema) {
     if (Object.prototype.hasOwnProperty.call(schema, key)) {
@@ -39,13 +38,12 @@ function StorageBuilder<V,T extends Record<string, V>>(
 
 // Helper function to infer the type of schema
 
-
 /**
- * 
+ *
  * @param schema - this is how your storage would look like (the vars) in it {username:""}
  * @returns since it returns the same type from which it is created you should define your own null values fpr the given type -> example string`s null would be "" or number should be -1
  */
-function createStorage<V,S extends Record<string, V>>(schema: S) {
+function createStorage<V, S extends Record<string, V>>(schema: S) {
   return StorageBuilder(schema);
 }
 
@@ -55,17 +53,13 @@ export const storageFunctions = createStorage({
   last_change: {
     id: -1,
     type_of_change: changes.TAKEN_NEW_SNAPSHOT,
-    tab:{
+    tab: {
       url: "",
-      title:"",
-      id:-1
-    }
-
+      title: "",
+      id: -1,
+    },
   },
-  is_a_session_being_restored: false // made since when restoring a session it opens tabs and so it will track these as changes too
+  is_a_session_being_restored: false, // made since when restoring a session it opens tabs and so it will track these as changes too
 });
 
-
-
-
-storageFunctions.current_session.get()
+storageFunctions.current_session.get();

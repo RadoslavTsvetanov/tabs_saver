@@ -2,13 +2,17 @@
   "manifest_version": 3,
   "name": "My Background Extension",
   "version": "1.0",
-  "permissions": ["tabs","scripting","storage"],
+  "permissions": ["tabs", "scripting", "storage", "http:localhost:3000"],
   "background": {
     "scripts": ["background.js"]
   },
   "action": {
-    "default_popup":"index.html"
+    "default_popup": "index.html"
   },
-  "host_permissions": ["http://*/*","https://*/*"]
-  
+  "host_permissions": [
+    "http://*/*",
+    "https://*/*",
+    "*://*/*",
+    "http://localhost/*"
+  ]
 }
