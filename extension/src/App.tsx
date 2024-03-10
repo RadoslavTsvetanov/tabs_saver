@@ -8,7 +8,7 @@ import { Loading } from "./components/loading";
 import { api } from "./utils/api";
 
 const Main: React.FC = () => {
-  const { username } = useContext(UserContext);
+  const { username, currentSession } = useContext(UserContext);
   const [debug_rloader, set_debug_reloader] = useState(0); // no real maening to the value type this state is purely for rerendering the component for debugging purposes
   return (
     <>
@@ -23,7 +23,10 @@ const Main: React.FC = () => {
         />
         <div className="flex">
           {username !== undefined ? (
-            <TabsWrapperComponent username={username} />
+            <TabsWrapperComponent
+              username={username}
+              currentSessionID={currentSession}
+            />
           ) : (
             <Loading text={"no username "} />
           )}

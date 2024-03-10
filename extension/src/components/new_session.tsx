@@ -44,6 +44,13 @@ export const NewSession: React.FC<{ userId: number }> = ({ userId }) => {
             }}
             text="create new session"
           />
+
+          <Button
+            text="nope ont wanna get my things deleted "
+            on_click={() => {
+              set_is_warnng_showed(false);
+            }}
+          />
         </div>
       )}
     </div>

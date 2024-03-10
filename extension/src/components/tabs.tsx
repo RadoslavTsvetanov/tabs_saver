@@ -78,9 +78,10 @@ const SessionComponent: React.FC<{ session: Session }> = ({ session }) => {
   );
 };
 
-export const TabsWrapperComponent: React.FC<{ username: string }> = ({
-  username,
-}) => {
+export const TabsWrapperComponent: React.FC<{
+  username: string;
+  currentSessionID: number | undefined;
+}> = ({ username, currentSessionID }) => {
   const [sessions, setSessions] = useState<Session[] | undefined>(undefined);
   const [userId, setUserId] = useState<number | undefined>(undefined);
   useEffect(() => {
@@ -92,7 +93,7 @@ export const TabsWrapperComponent: React.FC<{ username: string }> = ({
       }
     }
     fetchData();
-  }, [username]);
+  }, [username, currentSessionID]);
 
   return (
     <div className="flex flex-wrap">
