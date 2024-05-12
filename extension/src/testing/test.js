@@ -41,7 +41,7 @@ class API {
 const api = new API("http://localhost:3000");
 
 api
-  .addChangeToSession(3, {
+  .addChangeToSession(5, {
     type_of_change: changes.CLOSED_TAB,
     tab: {
       tab_id_given_from_chrome_api: 1,
