@@ -1,35 +1,11 @@
-# base
-FROM node:alpine AS base
+FROM node:alpine
 
-WORKDIR /usr/src/app
+WORKDIR /app
 
-COPY package*.json ./
+COPY package.json package-lock.json ./
 
 RUN npm install
 
-COPY . .
+COPY dist ./dist
 
-
-
-FROM base as builder
-
-WORKDIR /usr/src/app
-
-RUN npm run build
-
-
-# for production
-
-FROM node:alpine
-
-WORKDIR /usr/src/app
-
-COPY package*.json ./
-
-RUN npm install --only=production
-
-COPY --from=builder /usr/src/app/dist ./
-
-EXPOSE 3000
-
-ENTRYPOINT ["node","./app.js"]
+CMD ["npm", "start"]
