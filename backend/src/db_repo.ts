@@ -1,7 +1,31 @@
 import { Change, PrismaClient, Snapshot } from "@prisma/client";
 
 const prisma = new PrismaClient();
-
+export interface IDB {
+  createUser(name: string, email: string | null): Promise<any>;
+  addSession(
+    userId: number,
+    session: {
+      creation_date: Date;
+      baseSnapshot: {
+        tabs: {
+          tab_id_given_from_chrome_api: number;
+          url: string;
+          title: string;
+        }[];
+      };
+    }
+  ): Promise<any>;
+  addChange(
+    sessionId: number,
+    change: {
+      type_of_change: string;
+      tab: { tab_id_given_from_chrome_api: number; url: string; title: string };
+    }
+  ): Promise<any>;
+  getSession(sessionId: number): Promise<any>;
+  getUser(username: string): Promise<any>;
+}
 export class DB {
   async createUser(name: string, email: string | null = null) {
     try {

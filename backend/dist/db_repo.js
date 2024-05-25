@@ -13,8 +13,8 @@ exports.DB = void 0;
 const client_1 = require("@prisma/client");
 const prisma = new client_1.PrismaClient();
 class DB {
-    createUser(name, email = null) {
-        return __awaiter(this, void 0, void 0, function* () {
+    createUser(name_1) {
+        return __awaiter(this, arguments, void 0, function* (name, email = null) {
             try {
                 const newUser = yield prisma.user.create({
                     data: {
