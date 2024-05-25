@@ -16,10 +16,12 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
 const body_parser_1 = __importDefault(require("body-parser"));
 const db_repo_1 = require("./db_repo"); // Import your DB class from the file you've defined
+const cors_1 = __importDefault(require("cors"));
 // Create an instance of DB
 const db = new db_repo_1.DB();
 // Create Express app
 const app = (0, express_1.default)();
+app.use((0, cors_1.default)());
 // Middleware for parsing JSON bodies
 app.use(body_parser_1.default.json());
 // Define routes

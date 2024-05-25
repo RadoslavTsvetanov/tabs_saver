@@ -22,9 +22,9 @@ class DB {
                         email: email,
                         is_premium: false,
                         sessions: {
-                            create: []
-                        }
-                    }
+                            create: [],
+                        },
+                    },
                 });
                 return newUser;
             }
@@ -37,21 +37,21 @@ class DB {
     addSession(userId, session) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                // Create the baseSnapshot using the provided BaseSnapshotData
-                const baseSnapshot = yield prisma.snapshot.create({
+                // Create the baseSnapshot using the provided baseSnapshot
+                const new_baseSnapshot = yield prisma.snapshot.create({
                     data: {
                         tabs: {
-                            create: session.BaseSnapshotData.tabs
-                        }
-                    }
+                            create: session.baseSnapshot.tabs,
+                        },
+                    },
                 });
                 // Create the session and connect it to the baseSnapshot
                 const newSession = yield prisma.session.create({
                     data: {
                         creation_date: new Date(),
-                        baseSnapshot: { connect: { id: baseSnapshot.id } },
-                        user: { connect: { id: userId } }
-                    }
+                        baseSnapshot: { connect: { id: new_baseSnapshot.id } },
+                        user: { connect: { id: userId } },
+                    },
                 });
                 return newSession;
             }
@@ -68,7 +68,7 @@ class DB {
                 let session = yield prisma.session.findFirst({
                     where: {
                         id: sessionId,
-                    }
+                    },
                 });
                 if (!session) {
                     return;
@@ -77,16 +77,16 @@ class DB {
                     data: {
                         tab_id_given_from_chrome_api: change.tab.tab_id_given_from_chrome_api,
                         url: change.tab.url,
-                        title: change.tab.title
-                    }
+                        title: change.tab.title,
+                    },
                 });
                 // Create the change
                 const newChange = yield prisma.change.create({
                     data: {
                         type_of_change: change.type_of_change,
                         tabId: tab.id,
-                        sessionId: session.id
-                    }
+                        sessionId: session.id,
+                    },
                 });
                 return newChange;
             }
@@ -97,24 +97,24 @@ class DB {
         });
     }
     /*
-    
-     the sessionId is Global so every sessionId is unique to the overall sessions table and not relative
-    
-    */
+  
+   the sessionId is Global so every sessionId is unique to the overall sessions table and not relative
+  
+  */
     getSession(sessionId) {
         return __awaiter(this, void 0, void 0, function* () {
             const session = prisma.session.findFirst({
                 where: {
-                    id: sessionId
+                    id: sessionId,
                 },
                 include: {
                     baseSnapshot: {
                         include: {
-                            tabs: true
-                        }
+                            tabs: true,
+                        },
                     },
-                    changes: true
-                }
+                    changes: true,
+                },
             });
             return session;
         });
@@ -124,16 +124,20 @@ class DB {
             try {
                 const user = yield prisma.user.findUnique({
                     where: {
-                        name: username
+                        name: username,
                     },
                     include: {
                         sessions: {
                             include: {
-                                baseSnapshot: true,
+                                baseSnapshot: {
+                                    include: {
+                                        tabs: true,
+                                    },
+                                },
                                 changes: true,
-                            }
+                            },
                         },
-                    }
+                    },
                 });
                 return user;
             }
